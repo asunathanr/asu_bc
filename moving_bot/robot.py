@@ -45,8 +45,5 @@ class Unit(BCAbstractRobot):
     def turn(self):
         self.step += 1
 
-    def neighbors(self):
-        pass
-
 
 robot = Unit()
