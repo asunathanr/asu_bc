@@ -133,12 +133,12 @@ function best_first_search(grid, start, end) {
   var closed = new Set();
 
   while (queue.size() !== 0) {
-    var current = queue.dequeue();
-    if (end[0] === current.element[0] && end[1] === current.element[1]) {
+    var current = queue.pop();
+    if (end[0] === current.coord[0] && end[1] === current.coord[1]) {
       return current;
     }
-    closed = closed.add(current.element);
-    var n = neighbors(grid, current.element);
+    closed = closed.add(current.coord);
+    var n = neighbors(grid, current.coord);
     var unvisited_n = [];
     for (let i = 0; i < n.length; ++i) {
       if (closed.has(n[i]) === false) {
@@ -146,7 +146,7 @@ function best_first_search(grid, start, end) {
       }
     }
     for (let i = 0; i < unvisited_n.length; ++i) {
-      queue.enqueue(unvisited_n[i], manhattan(unvisited_n[i], end), current);
+      queue.push(new Node(manhattan(unvisited_n[i], end), unvisited_n[i], current));
     }
   }
   return undefined;
@@ -159,7 +159,7 @@ function trace_path(end) {
   var current = end;
   var path = [];
   while (current !== undefined) {
-    path.push(current.element);
+    path.push(current.coord);
     current = current.parent;
   }
   var dPath = [];
