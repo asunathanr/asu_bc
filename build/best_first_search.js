@@ -97,3 +97,5 @@ function trace_path(end) {
 
 path = trace_path(best_first_search(global_grid, [0, 0], [0, 1]));
 console.log(path);
+define("best_first_search", function(){});
+
