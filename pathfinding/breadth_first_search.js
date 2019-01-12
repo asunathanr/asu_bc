@@ -1,8 +1,9 @@
 
+/**
 function make_uniform_grid(size) {
-  grid = [];
+  var grid = [];
   for (let i = 0; i < size; ++i) {
-    row = []
+    var row = []
     for (let j = 0; j < size; ++j) {
       row.push(true);
     }
@@ -10,8 +11,9 @@ function make_uniform_grid(size) {
   }
   return grid;
 }
+*/
 
-var global_grid = make_uniform_grid(2);
+//var global_grid = make_uniform_grid(2);
 
 function valid_coord(coord) {
   return coord[0] > -1 && coord[1] > -1 && coord[0] < global_grid.length && coord[1] < global_grid.length;
@@ -84,5 +86,5 @@ function trace_path(end) {
   return dPath;
 }
 //console.log(global_grid[0][0]);
-path = trace_path(breadth_first_search([0, 0], [0, 1], neighbors));
-console.log(path);
+//path = trace_path(breadth_first_search([0, 0], [0, 1], neighbors));
+//console.log(path);
