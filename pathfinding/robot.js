@@ -1,5 +1,120 @@
 import { BCAbstractRobot, SPECS } from 'battlecode';
 
+
+// Got BinaryHeap from: http://eloquentjavascript.net/1st_edition/appendix2.html
+function BinaryHeap(scoreFunction){
+  this.content = [];
+  this.scoreFunction = scoreFunction;
+}
+
+BinaryHeap.prototype = {
+  push: function(element) {
+    // Add the new element to the end of the array.
+    this.content.push(element);
+    // Allow it to bubble up.
+    this.bubbleUp(this.content.length - 1);
+  },
+
+  pop: function() {
+    // Store the first element so we can return it later.
+    var result = this.content[0];
+    // Get the element at the end of the array.
+    var end = this.content.pop();
+    // If there are any elements left, put the end element at the
+    // start, and let it sink down.
+    if (this.content.length > 0) {
+      this.content[0] = end;
+      this.sinkDown(0);
+    }
+    return result;
+  },
+
+  remove: function(node) {
+    var length = this.content.length;
+    // To remove a value, we must search through the array to find
+    // it.
+    for (var i = 0; i < length; i++) {
+      if (this.content[i] != node) continue;
+      // When it is found, the process seen in 'pop' is repeated
+      // to fill up the hole.
+      var end = this.content.pop();
+      // If the element we popped was the one we needed to remove,
+      // we're done.
+      if (i == length - 1) break;
+      // Otherwise, we replace the removed element with the popped
+      // one, and allow it to float up or sink down as appropriate.
+      this.content[i] = end;
+      this.bubbleUp(i);
+      this.sinkDown(i);
+      break;
+    }
+  },
+
+  size: function() {
+    return this.content.length;
+  },
+
+  bubbleUp: function(n) {
+    // Fetch the element that has to be moved.
+    var element = this.content[n], score = this.scoreFunction(element);
+    // When at 0, an element can not go up any further.
+    while (n > 0) {
+      // Compute the parent element's index, and fetch it.
+      var parentN = Math.floor((n + 1) / 2) - 1,
+      parent = this.content[parentN];
+      // If the parent has a lesser score, things are in order and we
+      // are done.
+      if (score >= this.scoreFunction(parent))
+        break;
+
+      // Otherwise, swap the parent with the current element and
+      // continue.
+      this.content[parentN] = element;
+      this.content[n] = parent;
+      n = parentN;
+    }
+  },
+
+  sinkDown: function(n) {
+    // Look up the target element and its score.
+    var length = this.content.length,
+    element = this.content[n],
+    elemScore = this.scoreFunction(element);
+
+    while(true) {
+      // Compute the indices of the child elements.
+      var child2N = (n + 1) * 2, child1N = child2N - 1;
+      // This is used to store the new position of the element,
+      // if any.
+      var swap = null;
+      // If the first child exists (is inside the array)...
+      if (child1N < length) {
+        // Look it up and compute its score.
+        var child1 = this.content[child1N],
+        child1Score = this.scoreFunction(child1);
+        // If the score is less than our element's, we need to swap.
+        if (child1Score < elemScore)
+          swap = child1N;
+      }
+      // Do the same checks for the other child.
+      if (child2N < length) {
+        var child2 = this.content[child2N],
+        child2Score = this.scoreFunction(child2);
+        if (child2Score < (swap == null ? elemScore : child1Score))
+          swap = child2N;
+      }
+
+      // No need to swap further, we are done.
+      if (swap == null) break;
+
+      // Otherwise, swap and continue.
+      this.content[n] = this.content[swap];
+      this.content[swap] = element;
+      n = swap;
+    }
+  }
+};
+
 function valid_coord(grid, coord) {
   return coord[0] > -1 && coord[1] > -1 && coord[0] < grid.length && coord[1] < grid.length;
 }
@@ -36,7 +151,7 @@ class Node {
 
 function merge(node, arr) {
   arr.push(node);
-  return arr.sort(function (v1, v2) { return v1.f < v2.f; });
+  return arr;
 }
 
 function manhattan(pos1, pos2) {
@@ -44,11 +159,11 @@ function manhattan(pos1, pos2) {
 }
 
 function best_first_search(grid, start, end) {
-  var queue = [];
+  var queue = new BinaryHeap(function(element) {return element.f;});
   queue.push(new Node(manhattan(start, end), start, undefined));
   var closed = new Set();
 
-  while (queue.length !== 0) {
+  while (queue.size() !== 0) {
     var current = queue.pop();
     if (end[0] === current.coord[0] && end[1] === current.coord[1]) {
       return trace_path(current);
@@ -62,7 +177,7 @@ function best_first_search(grid, start, end) {
       }
     }
     for (let i = 0; i < unvisited_n.length; ++i) {
-      queue = merge(new Node(manhattan(unvisited_n[i], end), unvisited_n[i], current), queue);
+      queue.push(new Node(manhattan(unvisited_n[i], end), unvisited_n[i], current));
     }
   }
   return undefined;
@@ -117,17 +232,14 @@ class Path {
   }
   make(grid, start, goal) {
     this.pos = 0;
-    cells = best_first_search(grid, start, goal);
+    this.cells = best_first_search(grid, start, goal);
   }
 }
 
-const WHERES_THE_CASTLE = 10;
-
 class CrusaderState {
   constructor(crusader) {
-    this.current_state = initialState;
-    this.act(crusader);
-    this.castlePos = undefined;
+    this.current_state = this.initialState;
+    this.enemy_castle = undefined;
   }
 
   // Swap to different state. Next state will be performed next round,
@@ -143,26 +255,51 @@ class CrusaderState {
   // On creation deduce location of enemy castle and head for it.
   initialState(crusader) {
     var nearby_allies = crusader.getVisibleRobots();
-    if (nearby_allies[0]) {
-
+    var castle_pos = undefined;
+    for (var ally of nearby_allies) {
+      if (ally.unit === 0) {
+        castle_pos = [ally.x, ally.y];
+      }
     }
+    function find_enemy_castle(my_x, y) {
+      var midpoint = crusader.getPassableMap().length / 2;
+      return [crusader.getPassableMap().length - my_x, y];
+    }
+    crusader.make_path(crusader.my_pos(), find_enemy_castle(castle_pos[0], castle_pos[1]));
+    this.enemy_castle = castle_pos;
+    this.change_state(this.moveState);
+    return crusader.move_unit();
   }
 
   moveState(crusader) {
-
+    var next_pos = crusader.move_unit();
+    if (crusader.getVisibleRobotMap()[this.enemy_castle[0]][this.enemy_castle[1]]) {
+      this.change_state(this.attackState);
+    }
+    return crusader.move_unit();
   }
 
   attackState(crusader) {
-
+    var pos = [this.enemy_castle[0] - crusader.x, this.enemy_castle[1] - crusader.y];
+    return crusader.attack_enemy(pos[0], pos[1]);
   }
 
 }
 
-class 
+class CastleState {
+  constructor() {
+    this.currentState = initialState;
+  }
+
+  initialState(castle) {
+    
+  }
+}
 
 
 var path = new Path();
 var step = -1;
+var state = new CrusaderState();
 
 
 class MyRobot extends BCAbstractRobot {
@@ -201,13 +338,7 @@ class MyRobot extends BCAbstractRobot {
   crusader_turn() {
     this.castleTalk(10);
     this.log("CRUSADER: " + this.me.id);
-    // Check for enemy
-    enemies = this.visible_enemies();
-    if (enemies.length > 0) {
-      return this.attack_enemy(enemies[0]);
-    } else {
-      return this.move_unit();
-    }
+    return state.act(this);
   }
 
   pilgrim_turn() {
@@ -229,12 +360,12 @@ class MyRobot extends BCAbstractRobot {
   }
 
   attack_enemy(enemy) {
-    return this.attack(this.me.x - enemy.x, this.me.y - enemy.y);
+    return this.attack(this.me.x - enemy[0], this.me.y - enemy[1]);
   }
 
   move_unit() {
     if (!path.valid()) {
-      this.make_path(this.my_pos(), goal);
+      return undefined;
     }
     var choice = path.next();
     return this.move(choice[0], choice[1]);
