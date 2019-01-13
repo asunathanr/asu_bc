@@ -85,12 +85,83 @@ function trace_path(end) {
   return dPath;
 }
 
-function can_perform_action(cost, reserve) {
+function can_afford_action(cost, reserve) {
   return cost < reserve;
 }
 
+function unit_cost(specs, unit) {
+  return specs["UNITS"][specs[unit]]["CONSTRUCTION_FUEL"];
+}
 
-var path = [];
+const END_OF_PATH = -1;
+
+class Path {
+  constructor() {
+    this.cells = [];
+    this.pos = 0;
+  }
+  valid() {
+    return this.cells.length > 0;
+  }
+  next() {
+    var cell = undefined;
+    if (this.cells.length > 0 && this.pos < this.cells.length) {
+      cell = this.cells[this.pos];
+      this.pos++;
+    } else if (this.pos >= this.cells.length) {
+      cell = END_OF_PATH;
+    } else {
+      cell = undefined;
+    }
+    return cell;
+  }
+  make(grid, start, goal) {
+    this.pos = 0;
+    cells = best_first_search(grid, start, goal);
+  }
+}
+
+const WHERES_THE_CASTLE = 10;
+
+class CrusaderState {
+  constructor(crusader) {
+    this.current_state = initialState;
+    this.act(crusader);
+    this.castlePos = undefined;
+  }
+
+  // Swap to different state. Next state will be performed next round,
+  change_state(new_state) {
+    this.current_state = new_state;
+  }
+
+  // Perform tasks for current state.
+  act(crusader) {
+    this.current_state(crusader);
+  }
+
+  // On creation deduce location of enemy castle and head for it.
+  initialState(crusader) {
+    var nearby_allies = crusader.getVisibleRobots();
+    if (nearby_allies[0]) {
+
+    }
+  }
+
+  moveState(crusader) {
+
+  }
+
+  attackState(crusader) {
+
+  }
+
+}
+
+class 
+
+
+var path = new Path();
 var step = -1;
 
 
@@ -100,37 +171,74 @@ class MyRobot extends BCAbstractRobot {
     step++;
     if (this.me.unit === SPECS.CRUSADER) {
       return this.crusader_turn();
-    }
-
-    else if (this.me.unit === SPECS.CASTLE) {
+    } else if (this.me.unit === SPECS.CASTLE) {
       return this.castle_turn();
+    } else if (this.me.unit === SPECS.PILGRIM) {
+      return this.pilgrim_turn();
+    } else {
+      return;
     }
 
   }
 
   castle_turn() {
     this.log("CASTLE");
-    if (step % 10 === 0) {
-      //this.log("Building a crusader at " + (this.me.x+1) + ", " + (this.me.y+1));
+    for (var robot of this.getVisibleRobots()) {
+      if (this.isRadioing(robot)) {
+        console.log("Castletalk message: " + robot.castle_talk.toString());
+      }
+    }
+    if (can_afford_action(unit_cost(SPECS, "CRUSADER"), this.fuel) && step % 10 === 0) {
+      console.log("Building a crusader.");
       var n = neighbors(this.getPassableMap(), this.my_pos());
       var pos = n[Math.floor(Math.random() * n.length)];
       return this.buildUnit(SPECS.CRUSADER, pos[0] - this.me.x, pos[1] - this.me.y);
     } else {
-      return; // this.log("Castle health: " + this.me.health);
+      return;
     }
   }
 
   crusader_turn() {
-    // this.log("Crusader health: " + this.me.health);
-    this.log("CRUSADER" + this.me.id);
-    if (path.length < 1) {
-      path = this.make_path(this.my_pos(), this.rand_coord());
+    this.castleTalk(10);
+    this.log("CRUSADER: " + this.me.id);
+    // Check for enemy
+    enemies = this.visible_enemies();
+    if (enemies.length > 0) {
+      return this.attack_enemy(enemies[0]);
+    } else {
+      return this.move_unit();
     }
-    var choice = path.pop();
-    return this.move(choice[0], choice[1]);
   }
 
-  
+  pilgrim_turn() {
+    return;
+  }
+
+  visible_enemies() {
+    enemies = [];
+    for (var robot of this.getVisibleRobots()) {
+      if (this.is_enemy(robot)) {
+        enemies.push(robot);
+      }
+    }
+    return enemies;
+  }
+
+  is_enemy(robot) {
+    return robot.team !== this.me.team;
+  }
+
+  attack_enemy(enemy) {
+    return this.attack(this.me.x - enemy.x, this.me.y - enemy.y);
+  }
+
+  move_unit() {
+    if (!path.valid()) {
+      this.make_path(this.my_pos(), goal);
+    }
+    var choice = path.next();
+    return this.move(choice[0], choice[1]);
+  }
 
   radius(pos, r) {
     var coords = [];
@@ -152,8 +260,10 @@ class MyRobot extends BCAbstractRobot {
     var n = this.radius(this.my_pos(), 3);
     var filtered_coords = [];
     for (var i = 0; i < n.length; ++i) {
-      var temp = n[i];
-      if (this.getPassableMap()[temp[0]][temp[1]] === true && valid_coord(this.getPassableMap(), temp)) {
+      var neighbor_x = n[i][0];
+      var neighbor_y = n[i][1];
+      if (this.getPassableMap()[neighbor_x][neighbor_y]
+           && valid_coord(this.getPassableMap(), [neighbor_x, neighbor_y])) {
         filtered_coords.push(n[i]);
       }
     }
@@ -164,11 +274,11 @@ class MyRobot extends BCAbstractRobot {
   }
 
   make_path(start, goal) {
-    return best_first_search(
-      this.getPassableMap(),
-      start,
-      goal
-    );
+    path.make(this.getPassableMap(), start, goal);
+  }
+
+  log_value(desc, value) {
+    this.log(desc + value.toString());
   }
 
   convert_boolean_map(map) {
@@ -177,10 +287,6 @@ class MyRobot extends BCAbstractRobot {
       converted_map.push(map[i].map(Number));
     }
     return converted_map;
-  }
-
-  distance(p1, p2) {
-    return Math.abs(p1[0] - p2[0]) + Math.abs(p1[1] - p2[1]);
   }
 
 }
