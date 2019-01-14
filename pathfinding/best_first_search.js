@@ -228,7 +228,7 @@ function best_first_search(grid, start, end) {
     closed = closed.add(current.coord.toString());
     var n = neighbors(grid, current.coord);
     var unvisited_n = [];
-    for (neighbor of n) {
+    for (var neighbor of n) {
       if (!closed.has(neighbor.toString())) {
         unvisited_n.push(neighbor);
       }

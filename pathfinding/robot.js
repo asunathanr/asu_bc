@@ -120,18 +120,17 @@ function valid_coord(grid, coord) {
 }
 
 function neighbors(grid, cell) {
-
   const directions = [[0, 1], [0, -1], [1, 0], [-1, 0], [1, 1], [-1, -1], [-1, 1], [1, -1]];
   var coords = [];
   for (let i = 0; i < directions.length; ++i) {
     var dir = directions[i];
     coords.push([cell[0] + dir[0], cell[1] + dir[1]]);
   }
-  var empty_cells = [];
+  var empty_cells = new Set();
   for (let i = 0; i < coords.length; ++i) {
     var test_cell = coords[i];
-    if (valid_coord(grid, test_cell) === true && grid[test_cell[0]][test_cell[1]] === true) {
-      empty_cells.push(test_cell);
+    if (valid_coord(grid, test_cell) && grid[test_cell[0]][test_cell[1]] === true) {
+      empty_cells.add(test_cell);
     }
   }
   return empty_cells;
@@ -159,25 +158,26 @@ function manhattan(pos1, pos2) {
 }
 
 function best_first_search(grid, start, end) {
-  var queue = new BinaryHeap(function(element) {return element.f;});
-  queue.push(new Node(manhattan(start, end), start, undefined));
+  var open_set = new BinaryHeap(function(element) {return element.f;});
+  open_set.push(new Node(0, start, undefined));
   var closed = new Set();
+  closed.add(start);
 
-  while (queue.size() !== 0) {
-    var current = queue.pop();
+  while (open_set.size() !== 0) {
+    var current = open_set.pop();
     if (end[0] === current.coord[0] && end[1] === current.coord[1]) {
       return trace_path(current);
     }
-    closed = closed.add(current.coord);
+    closed = closed.add(current.coord.toString());
     var n = neighbors(grid, current.coord);
     var unvisited_n = [];
-    for (let i = 0; i < n.length; ++i) {
-      if (closed.has(n[i]) === false) {
-        unvisited_n.push(n[i]);
+    for (var neighbor of n) {
+      if (!closed.has(neighbor.toString())) {
+        unvisited_n.push(neighbor);
       }
     }
     for (let i = 0; i < unvisited_n.length; ++i) {
-      queue.push(new Node(manhattan(unvisited_n[i], end), unvisited_n[i], current));
+      open_set.push(new Node(manhattan(unvisited_n[i], end), unvisited_n[i], current));
     }
   }
   return undefined;
