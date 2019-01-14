@@ -119,7 +119,7 @@ function valid_coord(grid, coord) {
   return coord[0] > -1 && coord[1] > -1 && coord[0] < grid.length && coord[1] < grid.length;
 }
 
-function neighbors(grid, cell) {
+function neighbors(grid, cell, speed=0) {
   const directions = [[0, 1], [0, -1], [1, 0], [-1, 0], [1, 1], [-1, -1], [-1, 1], [1, -1]];
   var coords = [];
   for (let i = 0; i < directions.length; ++i) {
@@ -129,7 +129,7 @@ function neighbors(grid, cell) {
   var empty_cells = new Set();
   for (let i = 0; i < coords.length; ++i) {
     var test_cell = coords[i];
-    if (valid_coord(grid, test_cell) && grid[test_cell[0]][test_cell[1]] === true) {
+    if (valid_coord(grid, test_cell) && grid[test_cell[1]][test_cell[0]] === true) {
       empty_cells.add(test_cell);
     }
   }
@@ -165,7 +165,7 @@ function manhattan(pos1, pos2) {
  * @param {Array<Array<number>>} start 
  * @param {Array<Array<number>>} end 
  */
-function best_first_search(grid, start, end) {
+function best_first_search(grid, start, end, speed=SPECS['PILGRIM'].SPEED) {
   var open_set = new BinaryHeap(function(element) {return element.f;});
   open_set.push(new Node(0, start, undefined));
   var closed = new Set();
@@ -177,7 +177,7 @@ function best_first_search(grid, start, end) {
       return trace_path(current);
     }
     closed = closed.add(current.coord.toString());
-    var n = neighbors(grid, current.coord);
+    var n = neighbors(grid, current.coord, speed);
     var unvisited_n = [];
     for (var neighbor of n) {
       if (!closed.has(neighbor.toString())) {
@@ -201,6 +201,7 @@ function trace_path(end) {
     path.push(current.coord);
     current = current.parent;
   }
+  path = path.reverse();
   var dPath = [];
   for (var i = 0; i < path.length - 1; ++i) {
     dPath.push([path[i + 1][0] - path[i][0], path[i + 1][1] - path[i][1]]);
@@ -249,7 +250,9 @@ class Path {
 class CrusaderState {
   constructor(crusader) {
     this.current_state = this.initialState;
-    this.enemy_castle = undefined;
+    var x = crusader.me.x;
+    var y = crusader.me.y;
+    this.destination = {x:0,y:0};
   }
 
   // Swap to different state. Next state will be performed next round
@@ -264,33 +267,26 @@ class CrusaderState {
 
   // On creation deduce location of enemy castle and head for it.
   initialState(crusader) {
-    var nearby_allies = crusader.getVisibleRobots();
-    var castle_pos = undefined;
-    for (var ally of nearby_allies) {
-      if (ally.unit === SPECS['CASTLE']) {
-        castle_pos = [ally.x, ally.y];
-      }
-    }
     function find_enemy_castle(my_x, y) {
       var midpoint = crusader.getPassableMap().length / 2;
       return [0, 0];
     }
-    crusader.make_path(crusader.my_pos(), find_enemy_castle(castle_pos[0], castle_pos[1]));
-    this.enemy_castle = castle_pos;
+    crusader.make_path(crusader.my_pos(), [0, 0]);
     this.change_state(this.moveState);
-    return crusader.move_unit();
+    return act(crusader);
   }
 
   moveState(crusader) {
-    //if (crusader.getVisibleRobotMap()[this.enemy_castle[0]][this.enemy_castle[1]]) {
-      //this.change_state(this.attackState);
-    //}
+    if (manhattan(crusader.my_pos(), this.destination) === 1) {
+      this.change_state(this.attackState);
+      return act(crusader);
+    }
     return crusader.move_unit();
   }
 
   attackState(crusader) {
-    var pos = [this.enemy_castle[0] - crusader.x, this.enemy_castle[1] - crusader.y];
-    return crusader.attack_enemy(pos[0], pos[1]);
+    var pos = [this.destination[0] - crusader.x, this.destination[1] - crusader.y];
+    return crusader.attack_enemy(pos[1], pos[0]);
   }
 
 }
@@ -313,7 +309,7 @@ class CastleState {
 
   // Build crusaders for the next 5 turns
   initialState(castle) {
-    for (var i = 0; i < 2; ++i) {
+    for (var i = 0; i < 1; ++i) {
       this.build_q.push(SPECS['CRUSADER']);
     }
     this.changeState(this.buildState);
@@ -331,14 +327,14 @@ class CastleState {
     var dAdj = [[0, 1], [1, 0], [-1, 0], [0, -1], [1, 1], [-1, -1], [-1, 1], [1, -1]];
     var adjCells = dAdj.map(function(adj) { return [castle.me.x + adj[0], castle.me.y + adj[1]]; });
     var validCells = adjCells.filter(function(cell) { 
-      return castle.getPassableMap()[cell[0], cell[1]];
+      return castle.getPassableMap()[cell[1], cell[0]];
     });
     var chosenPosIndex = Math.floor(Math.random() * validCells.length);
     var chosenPos = validCells[chosenPosIndex];
     var chosenDxy = [castle.me.x - chosenPos[0], castle.me.y - chosenPos[1]];
     castle.log("Unit" + unit.toString());
     castle.log("Position: " + chosenDxy.toString());
-    return castle.buildUnit(unit, chosenDxy[0], chosenDxy[1]);
+    return castle.buildUnit(unit, chosenDxy[1], chosenDxy[0]);
   }
 
   // Do nothing -- may update later to check for messages.
@@ -376,7 +372,7 @@ class MyRobot extends BCAbstractRobot {
 
   assign_state(unit_type) {
     if (unit_type === SPECS.CRUSADER) {
-      state = new CrusaderState();
+      state = new CrusaderState(this);
     } else if (unit_type === SPECS.CASTLE) {
       state = new CastleState();
     }
@@ -445,7 +441,7 @@ class MyRobot extends BCAbstractRobot {
     for (var i = 0; i < n.length; ++i) {
       var neighbor_x = n[i][0];
       var neighbor_y = n[i][1];
-      if (this.getPassableMap()[neighbor_x][neighbor_y]
+      if (this.getPassableMap()[neighbor_y][neighbor_x]
            && valid_coord(this.getPassableMap(), [neighbor_x, neighbor_y])) {
         filtered_coords.push(n[i]);
       }
