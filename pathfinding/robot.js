@@ -312,6 +312,8 @@ class CastleState {
     this.changeState(this.buildState);
   }
 
+  // Pump out units in build queue one unit at a time.
+  // If build q is exhausted it switches to idle state.
   buildState(castle) {
     castle.log("In build state");
     if (this.build_q.length === 0) {
@@ -319,9 +321,11 @@ class CastleState {
       return;
     }
     var unit = this.build_q.shift();
-    var dAdj = [[0, 1], [1, 0], [-1, 0], [0, -1]];
+    var dAdj = [[0, 1], [1, 0], [-1, 0], [0, -1], [1, 1], [-1, -1], [-1, 1], [1, -1]];
     var adjCells = dAdj.map(function(adj) { return [castle.me.x + adj[0], castle.me.y + adj[1]]; });
-    var validCells = adjCells.filter(function(cell) { return castle.getPassableMap()[cell[0], cell[1]] });
+    var validCells = adjCells.filter(function(cell) { 
+      return castle.getPassableMap()[cell[0], cell[1]];
+    });
     var chosenPosIndex = Math.floor(Math.random() * validCells.length);
     var chosenPos = validCells[chosenPosIndex];
     var chosenDxy = [castle.me.x - chosenPos[0], castle.me.y - chosenPos[1]];
@@ -330,6 +334,7 @@ class CastleState {
     return castle.buildUnit(unit, chosenDxy[0], chosenDxy[1]);
   }
 
+  // Do nothing -- may update later to check for messages.
   idleState(castle) {
     return;
   }
