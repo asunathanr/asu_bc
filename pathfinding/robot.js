@@ -1,5 +1,5 @@
 import { BCAbstractRobot, SPECS } from 'battlecode';
-
+import nav from './nav.js';
 
 // Got BinaryHeap from: http://eloquentjavascript.net/1st_edition/appendix2.html
 function BinaryHeap(scoreFunction){
