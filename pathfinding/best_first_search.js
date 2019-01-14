@@ -132,7 +132,7 @@ function make_uniform_grid(size, prob = 0) {
 
 function print_grid(grid, path, start) {
   var path_locations = [start];
-  for (let i = 1; i < grid.length; ++i) {
+  for (let i = 1; i < path.length; ++i) {
     path_locations.push([path_locations[i - 1][0] + path[i][0], path_locations[i - 1][1] + path[i][1]]);
   }
   for (let i = 0; i < grid.length; ++i) {
@@ -264,7 +264,7 @@ function flatten(arr) {
 
 // Script part of script
 
-var global_grid = make_uniform_grid(8);
+var global_grid = make_uniform_grid(32);
 
 // manhattan distance tests
 assert(manhattan([0, 0], [0, 0]) === 0);
@@ -282,7 +282,7 @@ assert(!valid_coord(global_grid, [global_grid.length + 1, global_grid.length + 1
 
 // assert.deepStrictEqual(best_first_search(make_uniform_grid(5), [0, 0], [0, 1]), [[0, 1]]);
 
-var path = best_first_search(make_uniform_grid(32, 10), [0, 0], [15, 15]);
-console.log(neighbors(make_uniform_grid(32, 10), [0, 0]));
+var path = best_first_search(global_grid, [0, 0], [15, 15]);
+//console.log(neighbors(make_uniform_grid(32, 10), [0, 0]));
 console.log(path);
-// print_grid(global_grid, path, [0, 0]);
+print_grid(global_grid, path, [0, 0]);

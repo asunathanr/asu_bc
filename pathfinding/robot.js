@@ -157,6 +157,14 @@ function manhattan(pos1, pos2) {
   return Math.abs(pos1[0] - pos2[0]) + Math.abs(pos1[1] - pos2[1]);
 }
 
+/**
+ * Finds path from start to end using Greedy Best First Search.
+ * It is meant to be fast but not necessarily accurate.
+ * Will be replaced with something more accurate once robot.js is stable.
+ * @param {Array<boolean>} grid 
+ * @param {Array<Array<number>>} start 
+ * @param {Array<Array<number>>} end 
+ */
 function best_first_search(grid, start, end) {
   var open_set = new BinaryHeap(function(element) {return element.f;});
   open_set.push(new Node(0, start, undefined));
@@ -251,7 +259,7 @@ class CrusaderState {
 
   // Perform tasks for current state.
   act(crusader) {
-    this.current_state(crusader);
+    return this.current_state(crusader);
   }
 
   // On creation deduce location of enemy castle and head for it.
@@ -259,13 +267,13 @@ class CrusaderState {
     var nearby_allies = crusader.getVisibleRobots();
     var castle_pos = undefined;
     for (var ally of nearby_allies) {
-      if (ally.unit === 0) {
+      if (ally.unit === SPECS['CASTLE']) {
         castle_pos = [ally.x, ally.y];
       }
     }
     function find_enemy_castle(my_x, y) {
       var midpoint = crusader.getPassableMap().length / 2;
-      return [crusader.getPassableMap().length - my_x, y];
+      return [0, 0];
     }
     crusader.make_path(crusader.my_pos(), find_enemy_castle(castle_pos[0], castle_pos[1]));
     this.enemy_castle = castle_pos;
@@ -274,10 +282,9 @@ class CrusaderState {
   }
 
   moveState(crusader) {
-    var next_pos = crusader.move_unit();
-    if (crusader.getVisibleRobotMap()[this.enemy_castle[0]][this.enemy_castle[1]]) {
-      this.change_state(this.attackState);
-    }
+    //if (crusader.getVisibleRobotMap()[this.enemy_castle[0]][this.enemy_castle[1]]) {
+      //this.change_state(this.attackState);
+    //}
     return crusader.move_unit();
   }
 
@@ -409,7 +416,8 @@ class MyRobot extends BCAbstractRobot {
 
   move_unit() {
     if (!path.valid()) {
-      return undefined;
+      this.log("Crusader: " + this.me.id.toString() + " is trying to move on invalid path.");
+      return;
     }
     var choice = path.next();
     return this.move(choice[0], choice[1]);
