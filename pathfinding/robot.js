@@ -210,6 +210,7 @@ function unit_cost(specs, unit) {
 
 const END_OF_PATH = -1;
 
+// Encapsulates an array of coordinates which form a path.
 class Path {
   constructor() {
     this.cells = [];
@@ -236,13 +237,14 @@ class Path {
   }
 }
 
+// Controls behavior for crusader.
 class CrusaderState {
   constructor(crusader) {
     this.current_state = this.initialState;
     this.enemy_castle = undefined;
   }
 
-  // Swap to different state. Next state will be performed next round,
+  // Swap to different state. Next state will be performed next round
   change_state(new_state) {
     this.current_state = new_state;
   }
@@ -286,26 +288,58 @@ class CrusaderState {
 
 }
 
+// Set of behaviors for a castle.
 class CastleState {
   constructor() {
-    this.currentState = initialState;
+    this.currentState = this.initialState;
+    this.build_q = [];
   }
 
+  changeState(nextState) {
+    this.currentState = nextState;
+  }
+
+  // Do castle stuff depending on current state.
+  act(castle) {
+    this.currentState(castle);
+  }
+
+  // Build crusaders for the next 5 turns
   initialState(castle) {
+    for (var i = 0; i < 5; ++i) {
+      this.build_q.push(SPECS['CRUSADER']);
+    }
+    this.changeState(buildState);
+  }
+
+  buildState(castle) {
     
+    if (build_q.length === 0) {
+
+    }
+    unit = build_q.shift();
+  }
+
+  idleState(castle) {
+
   }
 }
 
 
 var path = new Path();
 var step = -1;
-var state = new CrusaderState();
+var state = undefined;
 
 
 class MyRobot extends BCAbstractRobot {
 
   turn() {
     step++;
+
+    if (state === undefined) {
+      this.assign_state(this.me.unit);
+    }
+
     if (this.me.unit === SPECS.CRUSADER) {
       return this.crusader_turn();
     } else if (this.me.unit === SPECS.CASTLE) {
@@ -316,6 +350,14 @@ class MyRobot extends BCAbstractRobot {
       return;
     }
 
+  }
+
+  assign_state(unit_type) {
+    if (unit_type === SPECS.CRUSADER) {
+      state = new CrusaderState();
+    } else if (unit_type === SPECS.CASTLE) {
+      state = new CastleState();
+    }
   }
 
   castle_turn() {
