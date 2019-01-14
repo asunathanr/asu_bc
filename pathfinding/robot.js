@@ -301,27 +301,37 @@ class CastleState {
 
   // Do castle stuff depending on current state.
   act(castle) {
-    this.currentState(castle);
+    return this.currentState(castle);
   }
 
   // Build crusaders for the next 5 turns
   initialState(castle) {
-    for (var i = 0; i < 5; ++i) {
+    for (var i = 0; i < 2; ++i) {
       this.build_q.push(SPECS['CRUSADER']);
     }
-    this.changeState(buildState);
+    this.changeState(this.buildState);
   }
 
   buildState(castle) {
-    
-    if (build_q.length === 0) {
-
+    castle.log("In build state");
+    if (this.build_q.length === 0) {
+      this.changeState(this.idleState);
+      return;
     }
-    unit = build_q.shift();
+    var unit = this.build_q.shift();
+    var dAdj = [[0, 1], [1, 0], [-1, 0], [0, -1]];
+    var adjCells = dAdj.map(function(adj) { return [castle.me.x + adj[0], castle.me.y + adj[1]]; });
+    var validCells = adjCells.filter(function(cell) { return castle.getPassableMap()[cell[0], cell[1]] });
+    var chosenPosIndex = Math.floor(Math.random() * validCells.length);
+    var chosenPos = validCells[chosenPosIndex];
+    var chosenDxy = [castle.me.x - chosenPos[0], castle.me.y - chosenPos[1]];
+    castle.log("Unit" + unit.toString());
+    castle.log("Position: " + chosenDxy.toString());
+    return castle.buildUnit(unit, chosenDxy[0], chosenDxy[1]);
   }
 
   idleState(castle) {
-
+    return;
   }
 }
 
@@ -362,23 +372,10 @@ class MyRobot extends BCAbstractRobot {
 
   castle_turn() {
     this.log("CASTLE");
-    for (var robot of this.getVisibleRobots()) {
-      if (this.isRadioing(robot)) {
-        console.log("Castletalk message: " + robot.castle_talk.toString());
-      }
-    }
-    if (can_afford_action(unit_cost(SPECS, "CRUSADER"), this.fuel) && step % 10 === 0) {
-      console.log("Building a crusader.");
-      var n = neighbors(this.getPassableMap(), this.my_pos());
-      var pos = n[Math.floor(Math.random() * n.length)];
-      return this.buildUnit(SPECS.CRUSADER, pos[0] - this.me.x, pos[1] - this.me.y);
-    } else {
-      return;
-    }
+    return state.act(this);
   }
 
   crusader_turn() {
-    this.castleTalk(10);
     this.log("CRUSADER: " + this.me.id);
     return state.act(this);
   }
