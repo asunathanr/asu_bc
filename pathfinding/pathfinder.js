@@ -1,6 +1,9 @@
+import AStarNode from './astar_node.js';
 import BinaryHeap from './binary_heap.js';
 import Cache from './cache.js';
 import Node from './node.js';
+
+const G_COST = 1;
 
 //neighbors
 	//grid: 2d boolean array of passable terrain
@@ -67,7 +70,7 @@ function tie_breaker_manhattan(pos1, pos2) {
  */
 function best_first_search(grid, start, end, speed) {
   var open_set = new BinaryHeap(function(element) {return element.f;});
-  open_set.push(new Node(0, start, undefined));
+  open_set.push(new AStarNode(0, start, undefined, 0));
   var closed = new Set();
   closed.add(start);
 
@@ -84,7 +87,42 @@ function best_first_search(grid, start, end, speed) {
       }
     }
     for (let i = 0; i < unvisited_n.length; ++i) {
-      open_set.push(new Node(tie_breaker_manhattan(unvisited_n[i], end), unvisited_n[i], current));
+      var cost = current.g + G_COST;
+      open_set.push(new Node(cost + manhattan(unvisited_n[i], end), unvisited_n[i], cost));
+    }
+  }
+  return Error('Unable to find path.');
+}
+
+/**
+ * Finds path from start to end using A*.
+ * It is meant to be fast but not necessarily accurate.
+ * Will be replaced with something more accurate once robot.js is stable.
+ * @todo Add Error checking for oob destination.
+ * @param {Array<boolean>} grid 
+ * @param {Array<Array<number>>} start 
+ * @param {Array<Array<number>>} end 
+ */
+function a_star(grid, start, end, speed) {
+  var open_set = new BinaryHeap(function(element) {return element.f;});
+  open_set.push(new Node(0, start, undefined, 1));
+  var closed = new Set();
+  closed.add(start);
+
+  while (open_set.size() !== 0) {
+    var current = open_set.pop();
+    if (end[0] === current.coord[0] && end[1] === current.coord[1]) {
+      return trace_path(current);
+    }
+    closed.add(current.coord.toString());
+    var unvisited_n = [];
+    for (var neighbor of neighbors(grid, {x: current.coord[0], y: current.coord[1]}, speed)) {
+      if (!closed.has(neighbor.toString())) {
+        unvisited_n.push(neighbor);
+      }
+    }
+    for (let i = 0; i < unvisited_n.length; ++i) {
+      open_set.push(new Node(manhattan(unvisited_n[i], end), unvisited_n[i], current));
     }
   }
   return Error('Unable to find path.');
@@ -109,4 +147,4 @@ function trace_path(end) {
 }
 
 
-export { manhattan, best_first_search };
+export { manhattan, a_star, best_first_search };

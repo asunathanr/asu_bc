@@ -7,7 +7,6 @@ import { manhattan } from './pathfinder.js';
 
 const CRUSADER_TYPE = SPECS.CRUSADER;
 
-
 class CrusaderState {
   /**
    * CrusaderState is a finite state machine which handles behavior for a crusader.
@@ -26,6 +25,9 @@ class CrusaderState {
 
   // Perform tasks for current state.
   act(crusader) {
+    if (crusader.me.time < 10) {
+      this.log("Oops! chess clock time is almost out. Value: ", crusader.me.time);
+    }
     return this.current_state(crusader);
   }
 

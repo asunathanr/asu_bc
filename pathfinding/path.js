@@ -1,4 +1,4 @@
-import { best_first_search } from 'pathfinder.js';
+import { a_star } from 'pathfinder.js';
 
 const END_OF_PATH = -1;
 
@@ -26,7 +26,7 @@ class Path {
 
   make(grid, start, goal, speed) {
     this.pos = 0;
-    this.cells = best_first_search(grid, start, goal, speed);
+    this.cells = a_star(grid, start, goal, speed);
   }
 }
 
