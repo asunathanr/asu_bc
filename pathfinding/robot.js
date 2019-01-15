@@ -5,6 +5,9 @@ import { END_OF_PATH, Path } from './path.js';
 import { manhattan } from './pathfinder.js';
 
 
+const CRUSADER_TYPE = SPECS.CRUSADER;
+
+
 class CrusaderState {
   /**
    * CrusaderState is a finite state machine which handles behavior for a crusader.
@@ -82,7 +85,7 @@ class CrusaderState {
 class CastleState {
   constructor() {
     this.currentState = this.initialState;
-    this.build_q = [];
+    this.to_build = CRUSADER_TYPE;
   }
 
   // SWAPPIN' STATE
@@ -96,23 +99,15 @@ class CastleState {
     return this.currentState(castle);
   }
 
-  // Build crusaders for the next 5 turns
+  // Goto idle state
   initialState(castle) {
-    for (var i = 0; i < 4; ++i) {
-      this.build_q.push(SPECS['CRUSADER']);
-    }
-    this.changeState(this.buildState);
-    return;
+    this.changeState(this.idleState);
+    return this.act(castle);
   }
 
   // Pump out units in build queue one unit at a time.
-  // If build q is exhausted it switches to idle state.
   buildState(castle) {
-    if (this.build_q.length === 0) {
-      this.changeState(this.idleState);
-      return;
-    }
-    var unit = this.build_q.shift();
+    var unit = this.to_build;
     var dAdj = [[0, 1], [1, 0], [-1, 0], [0, -1], [1, 1], [-1, -1], [-1, 1], [1, -1]];
     var adjCells = dAdj.map(function(adj) {
        return [castle.me.x + adj[0], castle.me.y + adj[1]]; 
@@ -123,11 +118,17 @@ class CastleState {
     var chosenPosIndex = Math.floor(Math.random() * validCells.length);
     var chosenPos = validCells[chosenPosIndex];
     var chosenDxy = [castle.me.x - chosenPos[0], castle.me.y - chosenPos[1]];
+    this.changeState(this.idleState);
     return castle.buildUnit(unit, chosenDxy[1], chosenDxy[0]);
   }
 
-  // Do nothing -- may update later to check for messages.
+  // Build a unit if the castle can afford it.
   idleState(castle) {
+    if (SPECS.UNITS[CRUSADER_TYPE].CONSTRUCTION_FUEL < castle.fuel &&
+        SPECS.UNITS[CRUSADER_TYPE].CONSTRUCTION_KARBONITE < castle.karbonite) {
+      this.changeState(this.buildState);
+      return this.act(castle);
+    }
     return;
   }
 }
