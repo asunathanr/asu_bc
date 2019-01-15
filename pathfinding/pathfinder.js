@@ -14,7 +14,7 @@ import Node from './node.js';
 		
 		var realSpeed; //speed converted to r units
 		for(var i=1; i**2<=speed;i++){
-			realSpeed = i**2;
+			realSpeed = i;
 		}
 		
 		//only consider points +/- realSpeed from cell
