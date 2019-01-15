@@ -1,19 +1,16 @@
 import { BCAbstractRobot, SPECS } from 'battlecode';
-import Path from 'path.js';
-import { best_first_search, manhattan } from 'pathfinder.js';
+import { END_OF_PATH, Path } from 'path.js';
+import { manhattan } from 'pathfinder.js';
 
 
-
-function valid_coord(grid, coord) {
-  return coord[0] > -1 && coord[1] > -1 && coord[0] < grid.length && coord[1] < grid.length;
-}
-
-// Controls behavior for crusader.
 class CrusaderState {
+  /**
+   * CrusaderState is a finite state machine which handles behavior for a crusader.
+   * @property current_state: When act is called the function stored in current_state will be called.
+   * @property destination: A coordinate indicating the current destination.
+   */
   constructor(crusader) {
     this.current_state = this.initialState;
-    var x = crusader.me.x;
-    var y = crusader.me.y;
     this.destination = {x:0,y:0};
   }
 
@@ -38,6 +35,11 @@ class CrusaderState {
     return this.act(crusader);
   }
 
+  /**
+   * Keep moving along assigned path while able.
+   * @todo Change state if destination reached.
+   * @param {MyRobot} crusader 
+   */
   moveState(crusader) {
     if (Math.floor(manhattan(crusader.my_pos(), [this.destination.x, this.destination.y])) === 1) {
       this.change_state(this.attackState);
@@ -46,6 +48,11 @@ class CrusaderState {
     return crusader.move_unit();
   }
 
+  /**
+   * Attack an enemy in range.
+   * @todo Swap to different state if no enemies in range. 
+   * @param {MyRobot} crusader 
+   */
   attackState(crusader) {
     var self = crusader;
     // get attackable robots
@@ -103,22 +110,21 @@ class CastleState {
   // Pump out units in build queue one unit at a time.
   // If build q is exhausted it switches to idle state.
   buildState(castle) {
-    castle.log("In build state");
     if (this.build_q.length === 0) {
       this.changeState(this.idleState);
       return;
     }
     var unit = this.build_q.shift();
     var dAdj = [[0, 1], [1, 0], [-1, 0], [0, -1], [1, 1], [-1, -1], [-1, 1], [1, -1]];
-    var adjCells = dAdj.map(function(adj) { return [castle.me.x + adj[0], castle.me.y + adj[1]]; });
+    var adjCells = dAdj.map(function(adj) {
+       return [castle.me.x + adj[0], castle.me.y + adj[1]]; 
+    });
     var validCells = adjCells.filter(function(cell) { 
       return castle.getPassableMap()[cell[1], cell[0]];
     });
     var chosenPosIndex = Math.floor(Math.random() * validCells.length);
     var chosenPos = validCells[chosenPosIndex];
     var chosenDxy = [castle.me.x - chosenPos[0], castle.me.y - chosenPos[1]];
-    castle.log("Unit" + unit.toString());
-    castle.log("Position: " + chosenDxy.toString());
     return castle.buildUnit(unit, chosenDxy[1], chosenDxy[0]);
   }
 
@@ -145,6 +151,13 @@ class MyRobot extends BCAbstractRobot {
     return state.act(this);
   }
 
+  /**
+   * Procedure to assign the correct state for the current unit.
+   * Is an instance of the factory method design pattern.
+   * https://sourcemaking.com/design_patterns/factory_method
+   * @param unit_type The current unit's build info.
+   * @returns undefined
+   */
   assign_state(unit_type) {
     if (unit_type === SPECS.CRUSADER) {
       state = new CrusaderState(this);
@@ -153,6 +166,9 @@ class MyRobot extends BCAbstractRobot {
     }
   }
 
+  /**
+   * @returns All visible enemies in range.
+   */
   visible_enemies() {
     enemies = [];
     for (var robot of this.getVisibleRobots()) {
@@ -209,33 +225,19 @@ class MyRobot extends BCAbstractRobot {
     return [this.me.x, this.me.y];
   }
 
-  rand_coord() {
-    var n = this.radius(this.my_pos(), 3);
-    var filtered_coords = [];
-    for (var i = 0; i < n.length; ++i) {
-      var neighbor_x = n[i][0];
-      var neighbor_y = n[i][1];
-      if (this.getPassableMap()[neighbor_y][neighbor_x]
-           && valid_coord(this.getPassableMap(), [neighbor_x, neighbor_y])) {
-        filtered_coords.push(n[i]);
-      }
-    }
-
-    var pos = Math.floor(Math.random() * filtered_coords.length);
-    this.log(filtered_coords.length);
-    return filtered_coords[pos];
-  }
-
   make_path(start, goal) {
     path.make(this.getPassableMap(), start, goal, SPECS.UNITS[this.me.unit].SPEED);
   }
 
+  /**
+   * Describes a value and logs it into the battlecode log system.
+   * @param {string} desc 
+   * @param {string} value 
+   */
   log_value(desc, value) {
-    this.log(desc + value.toString());
+    this.log(desc + value);
   }
 
 }
 
-
 var robot = new MyRobot();
-

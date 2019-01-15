@@ -30,4 +30,4 @@ class Path {
   }
 }
 
-export default Path;
+export { END_OF_PATH, Path };
