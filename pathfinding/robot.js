@@ -26,7 +26,7 @@ class CrusaderState {
   // Perform tasks for current state.
   act(crusader) {
     if (crusader.me.time < 10) {
-      this.log("Oops! chess clock time is almost out. Value: ", crusader.me.time);
+      crusader.log("Oops! chess clock time is almost out. Value: ", crusader.me.time);
     }
     return this.current_state(crusader);
   }

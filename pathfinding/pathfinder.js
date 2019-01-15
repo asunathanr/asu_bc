@@ -88,7 +88,7 @@ function best_first_search(grid, start, end, speed) {
     }
     for (let i = 0; i < unvisited_n.length; ++i) {
       var cost = current.g + G_COST;
-      open_set.push(new Node(cost + manhattan(unvisited_n[i], end), unvisited_n[i], cost));
+      open_set.push(new Node(cost + manhattan(unvisited_n[i], end), unvisited_n[i], current, cost));
     }
   }
   return Error('Unable to find path.');
