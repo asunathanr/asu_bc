@@ -70,7 +70,7 @@ function tie_breaker_manhattan(pos1, pos2) {
  */
 function best_first_search(grid, start, end, speed) {
   var open_set = new BinaryHeap(function(element) {return element.f;});
-  open_set.push(new AStarNode(0, start, undefined, 0));
+  open_set.push(new Node(0, start, undefined, 0));
   var closed = new Set();
   closed.add(start);
 
@@ -105,7 +105,7 @@ function best_first_search(grid, start, end, speed) {
  */
 function a_star(grid, start, end, speed) {
   var open_set = new BinaryHeap(function(element) {return element.f;});
-  open_set.push(new Node(0, start, undefined, 1));
+  open_set.push(new AStarNode(0, start, undefined, 1));
   var closed = new Set();
   closed.add(start);
 
@@ -122,7 +122,7 @@ function a_star(grid, start, end, speed) {
       }
     }
     for (let i = 0; i < unvisited_n.length; ++i) {
-      open_set.push(new Node(manhattan(unvisited_n[i], end), unvisited_n[i], current));
+      open_set.push(new AStarNode(manhattan(unvisited_n[i], end), unvisited_n[i], current));
     }
   }
   return Error('Unable to find path.');
