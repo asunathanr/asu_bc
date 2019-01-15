@@ -175,6 +175,7 @@ function arraysEqual(a, b) {
   return true;
 }
 
+/**
 function neighbors(grid, cell) {
 
   const directions = [[0, 1], [0, -1], [1, 0], [-1, 0], [1, 1], [-1, -1], [-1, 1], [1, -1]];
@@ -192,6 +193,41 @@ function neighbors(grid, cell) {
   }
   return empty_cells;
 }
+*/
+
+//neighbors
+	//grid: 2d boolean array of passable terrain
+	//cell: associative array with attributes cell.x and cell.y containing the component coordinates of a cell
+	//speed: the speed of the unit given in r^2 units
+	//
+	//returns the set of all coordinates that are neighbors to cell given the speed
+	//		each element of the set is an array where the 0 element is the x component and the 1 element is the y
+	function neighbors(grid, cell, speed) {
+		var neighborCells = new Set(); //set of nieghbors to be returned
+		
+		var realSpeed; //speed converted to r units
+		for(var i=1; i**2<=speed;i++){
+			realSpeed = i**2;
+		}
+		
+		//only consider points +/- realSpeed from cell
+		for(var x=-realSpeed;x<=realSpeed;x++){
+			for(var y=-realSpeed;y<=realSpeed;y++){
+				//point is within speed radius
+				if((x**2+y**2)<=speed){
+					//point is in bounds
+					if(cell.x+x>=0 && cell.x+x<grid.length && cell.y+y>=0 && cell.y+y<grid.length){
+						//point is passable
+						if(grid[cell.y+y][cell.x+x]===true){
+							neighborCells.add([cell.x+x,cell.y+y]);
+						}
+					}
+				}
+			}
+		}
+		
+		return neighborCells;
+	}
 
 class Node {
   constructor(f, coord, parent) {
@@ -214,7 +250,15 @@ function manhattan(pos1, pos2) {
   return Math.abs(pos1[0] - pos2[0]) + Math.abs(pos1[1] - pos2[1]);
 }
 
-function best_first_search(grid, start, end) {
+/**
+ * Finds path from start to end using Greedy Best First Search.
+ * It is meant to be fast but not necessarily accurate.
+ * Will be replaced with something more accurate once robot.js is stable.
+ * @param {Array<boolean>} grid 
+ * @param {Array<Array<number>>} start 
+ * @param {Array<Array<number>>} end 
+ */
+function best_first_search(grid, start, end, speed=4) {
   var open_set = new BinaryHeap(function(element) {return element.f;});
   open_set.push(new Node(0, start, undefined));
   var closed = new Set();
@@ -226,7 +270,9 @@ function best_first_search(grid, start, end) {
       return trace_path(current);
     }
     closed = closed.add(current.coord.toString());
-    var n = neighbors(grid, current.coord);
+    var x = current.coord[0];
+    var y = current.coord[1];
+    var n = neighbors(grid, {x, y}, speed);
     var unvisited_n = [];
     for (var neighbor of n) {
       if (!closed.has(neighbor.toString())) {
@@ -250,9 +296,10 @@ function trace_path(end) {
     path.push(current.coord);
     current = current.parent;
   }
+  path = path.reverse();
   var dPath = [];
   for (var i = 0; i < path.length - 1; ++i) {
-    dPath.push([path[i][0] - path[i + 1][0], path[i][1] - path[i + 1][1]]);
+    dPath.push([path[i + 1][0] - path[i][0], path[i + 1][1] - path[i][1]]);
   }
   return dPath;
 }
@@ -283,6 +330,6 @@ assert(!valid_coord(global_grid, [global_grid.length + 1, global_grid.length + 1
 // assert.deepStrictEqual(best_first_search(make_uniform_grid(5), [0, 0], [0, 1]), [[0, 1]]);
 
 var path = best_first_search(global_grid, [0, 0], [15, 15]);
-//console.log(neighbors(make_uniform_grid(32, 10), [0, 0]));
-console.log(path);
-print_grid(global_grid, path, [0, 0]);
+console.log(neighbors(make_uniform_grid(32, 0), {x:0, y:0}, 4));
+//console.log(path);
+//print_grid(global_grid, path, [0, 0]);

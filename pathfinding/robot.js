@@ -1,6 +1,8 @@
 import { BCAbstractRobot, SPECS } from 'battlecode';
 import nav from './nav.js';
 
+const END_OF_PATH = -1;
+
 // Got BinaryHeap from: http://eloquentjavascript.net/1st_edition/appendix2.html
 function BinaryHeap(scoreFunction){
   this.content = [];
@@ -119,12 +121,13 @@ function valid_coord(grid, coord) {
   return coord[0] > -1 && coord[1] > -1 && coord[0] < grid.length && coord[1] < grid.length;
 }
 
+/**
 function neighbors(grid, cell, speed=0) {
   const directions = [[0, 1], [0, -1], [1, 0], [-1, 0], [1, 1], [-1, -1], [-1, 1], [1, -1]];
   var coords = [];
   for (let i = 0; i < directions.length; ++i) {
     var dir = directions[i];
-    coords.push([cell[0] + dir[0], cell[1] + dir[1]]);
+    coords.push([cell.x + dir[0], cell.y + dir[1]]);
   }
   var empty_cells = new Set();
   for (let i = 0; i < coords.length; ++i) {
@@ -135,6 +138,41 @@ function neighbors(grid, cell, speed=0) {
   }
   return empty_cells;
 }
+*/
+
+//neighbors
+	//grid: 2d boolean array of passable terrain
+	//cell: associative array with attributes cell.x and cell.y containing the component coordinates of a cell
+	//speed: the speed of the unit given in r^2 units
+	//
+	//returns the set of all coordinates that are neighbors to cell given the speed
+	//		each element of the set is an array where the 0 element is the x component and the 1 element is the y
+	function neighbors(grid, cell, speed) {
+		var neighborCells = new Set(); //set of nieghbors to be returned
+		
+		var realSpeed; //speed converted to r units
+		for(var i=1; i**2<=speed;i++){
+			realSpeed = i**2;
+		}
+		
+		//only consider points +/- realSpeed from cell
+		for(var x=-realSpeed;x<=realSpeed;x++){
+			for(var y=-realSpeed;y<=realSpeed;y++){
+				//point is within speed radius
+				if((x**2+y**2)<=speed){
+					//point is in bounds
+					if(cell.x+x>=0 && cell.x+x<grid.length && cell.y+y>=0 && cell.y+y<grid.length){
+						//point is passable
+						if(grid[cell.y+y][cell.x+x]===true){
+							neighborCells.add([cell.x+x,cell.y+y]);
+						}
+					}
+				}
+			}
+		}
+		
+		return neighborCells;
+	}
 
 class Node {
   constructor(f, coord, parent) {
@@ -177,9 +215,10 @@ function best_first_search(grid, start, end, speed=SPECS['PILGRIM'].SPEED) {
       return trace_path(current);
     }
     closed = closed.add(current.coord.toString());
-    var n = neighbors(grid, current.coord, speed);
+    var x = current.coord[0];
+    var y = current.coord[1];
     var unvisited_n = [];
-    for (var neighbor of n) {
+    for (var neighbor of neighbors(grid, {x, y}, speed)) {
       if (!closed.has(neighbor.toString())) {
         unvisited_n.push(neighbor);
       }
@@ -188,7 +227,7 @@ function best_first_search(grid, start, end, speed=SPECS['PILGRIM'].SPEED) {
       open_set.push(new Node(manhattan(unvisited_n[i], end), unvisited_n[i], current));
     }
   }
-  return undefined;
+  return Error('Unable to find path.');
 }
 
 function trace_path(end) {
@@ -217,7 +256,7 @@ function unit_cost(specs, unit) {
   return specs["UNITS"][specs[unit]]["CONSTRUCTION_FUEL"];
 }
 
-const END_OF_PATH = -1;
+
 
 // Encapsulates an array of coordinates which form a path.
 class Path {
@@ -240,9 +279,9 @@ class Path {
     }
     return cell;
   }
-  make(grid, start, goal) {
+  make(grid, start, goal, speed=SPECS['PILGRIM'].SPEED) {
     this.pos = 0;
-    this.cells = best_first_search(grid, start, goal);
+    this.cells = best_first_search(grid, start, goal, speed);
   }
 }
 
@@ -273,20 +312,39 @@ class CrusaderState {
     }
     crusader.make_path(crusader.my_pos(), [0, 0]);
     this.change_state(this.moveState);
-    return act(crusader);
+    return this.act(crusader);
   }
 
   moveState(crusader) {
-    if (manhattan(crusader.my_pos(), this.destination) === 1) {
+    if (Math.floor(manhattan(crusader.my_pos(), [this.destination.x, this.destination.y])) === 1) {
       this.change_state(this.attackState);
-      return act(crusader);
+      return this.act(crusader);
     }
     return crusader.move_unit();
   }
 
   attackState(crusader) {
-    var pos = [this.destination[0] - crusader.x, this.destination[1] - crusader.y];
-    return crusader.attack_enemy(pos[1], pos[0]);
+    var self = crusader;
+    // get attackable robots
+    var attackable = self.visible.filter((r) => {
+      if (! self.isVisible(r)){
+          return false;
+      }
+      const dist = (r.x-self.me.x)**2 + (r.y-self.me.y)**2;
+      if (r.team !== self.me.team
+          && SPECS.UNITS[SPECS.CRUSADER].ATTACK_RADIUS[0] <= dist
+          && dist <= SPECS.UNITS[SPECS.CRUSADER].ATTACK_RADIUS[1]) {
+          return true;
+      }
+      return false;
+    });
+    if (attackable.length > 0) {
+      var r = attackable[0];
+      crusader.log('' + r);
+      crusader.log('attacking! ' + r + ' at loc ' + (r.x - crusader.me.x, r.y - crusader.me.y));
+      return this.attack(r.x - crusader.me.x, r.y - crusader.me.y);
+    }
+    return;
   }
 
 }
@@ -416,7 +474,12 @@ class MyRobot extends BCAbstractRobot {
       return;
     }
     var choice = path.next();
-    return this.move(choice[0], choice[1]);
+    if (choice === END_OF_PATH) {
+      return;
+    } else {
+      return this.move(choice[0], choice[1]);
+    }
+    
   }
 
   radius(pos, r) {
@@ -453,7 +516,7 @@ class MyRobot extends BCAbstractRobot {
   }
 
   make_path(start, goal) {
-    path.make(this.getPassableMap(), start, goal);
+    path.make(this.getPassableMap(), start, goal, SPECS.UNITS[this.me.unit].SPEED);
   }
 
   log_value(desc, value) {

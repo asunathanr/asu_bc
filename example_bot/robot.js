@@ -32,7 +32,7 @@ class MyRobot extends BCAbstractRobot {
                 const dist = (r.x-self.me.x)**2 + (r.y-self.me.y)**2;
                 if (r.team !== self.me.team
                     && SPECS.UNITS[SPECS.CRUSADER].ATTACK_RADIUS[0] <= dist
-                    && dist <= SPECS.UNITS[SPECS.CRUSADER].ATTACK_RADIUS[1] ){
+                    && dist <= SPECS.UNITS[SPECS.CRUSADER].ATTACK_RADIUS[1]) {
                     return true;
                 }
                 return false;
