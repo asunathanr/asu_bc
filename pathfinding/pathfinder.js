@@ -41,8 +41,19 @@ function manhattan(pos1, pos2) {
   return Math.abs(pos1[0] - pos2[0]) + Math.abs(pos1[1] - pos2[1]);
 }
 
+
+var manhattan_cache = new Cache();
+
 function tie_breaker_manhattan(pos1, pos2) {
-  return manhattan(pos1, pos2) * (1.0 + 1/1000);
+  var dist = 0;
+  var key = pos1.toString().concat(pos2.toString());
+  if (manhattan_cache.has(key)) {
+    dist = manhattan_cache.get(key);
+  } else {
+    dist = manhattan(pos1, pos2) * (1.0 + 1/1000);
+    manhattan_cache.add(key);
+  }
+  return dist;
 }
 
 /**

@@ -8,7 +8,7 @@ class Cache {
   }
 
   get(key) {
-    return this.get(key);
+    return this.cache.get(key);
   }
 
   add(key, value) {
