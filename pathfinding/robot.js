@@ -124,7 +124,7 @@ function neighbors(grid, cell, speed=0) {
   var coords = [];
   for (let i = 0; i < directions.length; ++i) {
     var dir = directions[i];
-    coords.push([cell[0] + dir[0], cell[1] + dir[1]]);
+    coords.push([cell.x + dir[0], cell.y + dir[1]]);
   }
   var empty_cells = new Set();
   for (let i = 0; i < coords.length; ++i) {
@@ -177,7 +177,7 @@ function best_first_search(grid, start, end, speed=SPECS['PILGRIM'].SPEED) {
       return trace_path(current);
     }
     closed = closed.add(current.coord.toString());
-    var n = neighbors(grid, current.coord, speed);
+    var n = neighbors(grid, {x: current.coord[0], y: current.coord[1]}, speed);
     var unvisited_n = [];
     for (var neighbor of n) {
       if (!closed.has(neighbor.toString())) {
@@ -286,7 +286,7 @@ class CrusaderState {
 
   attackState(crusader) {
     var pos = [this.destination[0] - crusader.x, this.destination[1] - crusader.y];
-    return crusader.attack_enemy(pos[1], pos[0]);
+    return crusader.attack_enemy(pos[0], pos[1]);
   }
 
 }
