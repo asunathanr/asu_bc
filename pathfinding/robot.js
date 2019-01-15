@@ -34,15 +34,68 @@ class CrusaderState {
   }
 
   /**
-   * Keep moving along assigned path while able.
-   * @todo Change state if destination reached.
+   * if enemy unit in attackable range change to attack state
+   * elif if destination reached, generate new destination
+   * else move toward destination
+   * @todo refactor attackable units into a helper funciton
+   * @todo refactor new destination function
    * @param {MyRobot} crusader 
    */
   moveState(crusader) {
+	/*
     if (Math.floor(manhattan(crusader.my_pos(), [this.destination.x, this.destination.y])) === 1) {
       this.change_state(this.attackState);
       return this.act(crusader);
     }
+	*/
+	// get attackable robots
+	var self = crusader;
+	var attackable = self.getVisibleRobots().filter((r) => {
+      if (! self.isVisible(r)){
+          return false;
+      }
+      const dist = (r.x-self.me.x)**2 + (r.y-self.me.y)**2;
+      if (r.team !== self.me.team
+          && SPECS.UNITS[SPECS.CRUSADER].ATTACK_RADIUS[0] <= dist
+          && dist <= SPECS.UNITS[SPECS.CRUSADER].ATTACK_RADIUS[1]) {
+          return true;
+      }
+      return false;
+    });
+	
+	//go to attack state if enemy units in range
+	if(attackable.length > 0){
+		this.change_state(this.attackState);
+		return this.act(crusader);
+	}
+	//change destination to random destination in map half
+	else if(crusader.me.x===this.destination.x && crusader.me.y===this.destination.y) {
+		var newDestination = () => {
+			var half = Math.floor(crusader.map.length/2);
+			if(isHorizontalReflection(crusader.map)){
+				if(crusader.me.y<half)){
+					return [Math.floor(Math.random()*crusader.map.length),Math.floor(Math.random()*half)];
+				}
+				else{
+					return [Math.floor(Math.random()*crusader.map.length),Math.floor(Math.random()*half)+half];
+				}
+			}
+			else{
+				if(crusader.me.x<half){
+					return [Math.floor(Math.random()*half),Math.floor(Math.random()*crusader.map.length)];
+				}
+				else {
+					return [Math.floor(Math.random()*half)+half,Math.floor(Math.random()*crusader.map.length)];
+				}
+			}
+		};
+		
+		this.destination.x = newDestination[0];
+		this.destination.y = newDestination[1];
+		
+		crusader.make_path(crusader.my_pos(), [this.destination.x, this.destination.y]);
+	}
+	
     return crusader.move_unit();
   }
 
