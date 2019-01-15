@@ -29,3 +29,5 @@ function isHorizontalReflection(grid){
 		//todo: implement handling for perfectly symmetric map
 		return Error('failed to compute map symmetry');
 	}
+
+	export { isHorizontalReflection };

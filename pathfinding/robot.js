@@ -1,6 +1,8 @@
 import { BCAbstractRobot, SPECS } from 'battlecode';
-import { END_OF_PATH, Path } from 'path.js';
-import { manhattan } from 'pathfinder.js';
+import { isHorizontalReflection } from './horizontal_sym.js';
+import nav from './nav.js';
+import { END_OF_PATH, Path } from './path.js';
+import { manhattan } from './pathfinder.js';
 
 
 class CrusaderState {
@@ -11,7 +13,7 @@ class CrusaderState {
    */
   constructor(crusader) {
     this.current_state = this.initialState;
-    this.destination = {x:0,y:0};
+    this.destination = nav.reflect({x:crusader.me.x, y:crusader.me.y}, crusader.map, isHorizontalReflection(crusader.map));
   }
 
   // Swap to different state. Next state will be performed next round
@@ -26,11 +28,7 @@ class CrusaderState {
 
   // On creation deduce location of enemy castle and head for it.
   initialState(crusader) {
-    function find_enemy_castle(my_x, y) {
-      var midpoint = crusader.getPassableMap().length / 2;
-      return [0, 0];
-    }
-    crusader.make_path(crusader.my_pos(), [0, 0]);
+    crusader.make_path(crusader.my_pos(), [this.destination.x, this.destination.y]);
     this.change_state(this.moveState);
     return this.act(crusader);
   }
@@ -142,6 +140,12 @@ var state = undefined;
 
 class MyRobot extends BCAbstractRobot {
 
+  /**
+   * @returns An action command (command pattern) that tells the API which action the robot
+   *          should perform. If no action should be taken then just return; is fine.
+   *          However make sure to have a return statement somewhere in this code.
+   *          If no return statement is given a reference error will usually occur.
+   */
   turn() {
     step++;
 
