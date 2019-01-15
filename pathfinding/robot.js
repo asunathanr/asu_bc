@@ -1,5 +1,6 @@
 import { BCAbstractRobot, SPECS } from 'battlecode';
 import BinaryHeap from './binary_heap.js';
+import Node from './node.js';
 import nav from './nav.js';
 
 const END_OF_PATH = -1;
@@ -43,22 +44,6 @@ function valid_coord(grid, coord) {
 		return neighborCells;
 	}
 
-class Node {
-  constructor(f, coord, parent) {
-    this.f = f;
-    this.coord = coord;
-    this.parent = parent;
-  }
-
-  lt(other) {
-    return this.f < other.f;
-  }
-}
-
-function merge(node, arr) {
-  arr.push(node);
-  return arr;
-}
 
 function manhattan(pos1, pos2) {
   return Math.abs(pos1[0] - pos2[0]) + Math.abs(pos1[1] - pos2[1]);
