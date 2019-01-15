@@ -69,7 +69,7 @@ class CrusaderState {
 	//go to attack state if enemy units in range
 	if(attackable.length > 0){
 		this.change_state(this.attackState);
-		return this.act(crusader);
+		return this.attackState(crusader);
 	}
 	//change destination to random destination in map half
 	else if(crusader.me.x===this.destination.x && crusader.me.y===this.destination.y) {
@@ -104,7 +104,6 @@ class CrusaderState {
 
   /**
    * Attack an enemy in range.
-   * @todo Swap to different state if no enemies in range. 
    * @param {MyRobot} crusader 
    */
   attackState(crusader) {
@@ -128,6 +127,10 @@ class CrusaderState {
       crusader.log('attacking! ' + r + ' at loc ' + (r.x - crusader.me.x, r.y - crusader.me.y));
       return crusader.attack(r.x - crusader.me.x, r.y - crusader.me.y);
     }
+	else{
+		this.change_state(this.moveState);
+		this.moveState(crusader);
+	}
     return;
   }
 
