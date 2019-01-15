@@ -133,6 +133,7 @@ class CastleState {
       this.build_q.push(SPECS['CRUSADER']);
     }
     this.changeState(this.buildState);
+    return;
   }
 
   // Pump out units in build queue one unit at a time.
@@ -177,17 +178,7 @@ class MyRobot extends BCAbstractRobot {
     if (state === undefined) {
       this.assign_state(this.me.unit);
     }
-
-    if (this.me.unit === SPECS.CRUSADER) {
-      return this.crusader_turn();
-    } else if (this.me.unit === SPECS.CASTLE) {
-      return this.castle_turn();
-    } else if (this.me.unit === SPECS.PILGRIM) {
-      return this.pilgrim_turn();
-    } else {
-      return;
-    }
-
+    return state.act(this);
   }
 
   assign_state(unit_type) {
@@ -196,20 +187,6 @@ class MyRobot extends BCAbstractRobot {
     } else if (unit_type === SPECS.CASTLE) {
       state = new CastleState();
     }
-  }
-
-  castle_turn() {
-    this.log("CASTLE");
-    return state.act(this);
-  }
-
-  crusader_turn() {
-    this.log("CRUSADER: " + this.me.id);
-    return state.act(this);
-  }
-
-  pilgrim_turn() {
-    return;
   }
 
   visible_enemies() {
