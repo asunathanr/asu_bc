@@ -76,7 +76,7 @@ class CrusaderState {
 		var newDestination = () => {
 			var half = Math.floor(crusader.map.length/2);
 			if(isHorizontalReflection(crusader.map)){
-				if(crusader.me.y<half)){
+				if(crusader.me.y<half){
 					return [Math.floor(Math.random()*crusader.map.length),Math.floor(Math.random()*half)];
 				}
 				else{
