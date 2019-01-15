@@ -44,6 +44,7 @@ function manhattan(pos1, pos2) {
  * Finds path from start to end using Greedy Best First Search.
  * It is meant to be fast but not necessarily accurate.
  * Will be replaced with something more accurate once robot.js is stable.
+ * @todo Add Error checking for oob destination.
  * @param {Array<boolean>} grid 
  * @param {Array<Array<number>>} start 
  * @param {Array<Array<number>>} end 
