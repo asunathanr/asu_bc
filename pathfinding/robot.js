@@ -108,7 +108,7 @@ class CastleState {
   // Pump out one unit at a time.
   buildState(castle) {
     var unit = this.to_build;
-    var dAdj = [[0, 1], [1, 0], [-1, 0], [0, -1], [1, 1], [-1, -1], [-1, 1], [1, -1]];
+    const dAdj = [[0, 1], [1, 0], [-1, 0], [0, -1], [1, 1], [-1, -1], [-1, 1], [1, -1]];
     var adjCells = dAdj.map(function(adj) {
        return [castle.me.x + adj[0], castle.me.y + adj[1]]; 
     });

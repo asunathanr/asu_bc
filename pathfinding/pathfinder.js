@@ -1,4 +1,5 @@
 import BinaryHeap from './binary_heap.js';
+import Cache from './cache.js';
 import Node from './node.js';
 
 //neighbors
@@ -40,6 +41,10 @@ function manhattan(pos1, pos2) {
   return Math.abs(pos1[0] - pos2[0]) + Math.abs(pos1[1] - pos2[1]);
 }
 
+function tie_breaker_manhattan(pos1, pos2) {
+  return manhattan(pos1, pos2) * (1.0 + 1/1000);
+}
+
 /**
  * Finds path from start to end using Greedy Best First Search.
  * It is meant to be fast but not necessarily accurate.
@@ -60,17 +65,15 @@ function best_first_search(grid, start, end, speed) {
     if (end[0] === current.coord[0] && end[1] === current.coord[1]) {
       return trace_path(current);
     }
-    closed = closed.add(current.coord.toString());
-    var x = current.coord[0];
-    var y = current.coord[1];
+    closed.add(current.coord.toString());
     var unvisited_n = [];
-    for (var neighbor of neighbors(grid, {x, y}, speed)) {
+    for (var neighbor of neighbors(grid, {x: current.coord[0], y: current.coord[1]}, speed)) {
       if (!closed.has(neighbor.toString())) {
         unvisited_n.push(neighbor);
       }
     }
     for (let i = 0; i < unvisited_n.length; ++i) {
-      open_set.push(new Node(manhattan(unvisited_n[i], end), unvisited_n[i], current));
+      open_set.push(new Node(tie_breaker_manhattan(unvisited_n[i], end), unvisited_n[i], current));
     }
   }
   return Error('Unable to find path.');
