@@ -1,3 +1,11 @@
+function can_afford_action(cost, reserve) {
+    return cost < reserve;
+}
+  
+function unit_cost(specs, unit) {
+    return specs["UNITS"][specs[unit]]["CONSTRUCTION_FUEL"];
+}
+
 function radius(pos, r) {
   coords = [];
   for (let i = pos[0] - r; i < pos[0] + r; ++i) {
@@ -10,4 +18,4 @@ function radius(pos, r) {
   return coords;
 }
 
-console.log(radius([0, 0], 3));
+export {can_afford_action, unit_cost, radius};

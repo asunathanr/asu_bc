@@ -1,50 +1,11 @@
 import { BCAbstractRobot, SPECS } from 'battlecode';
+import Path from 'path.js';
 import { best_first_search, manhattan } from 'pathfinder.js';
 
-const END_OF_PATH = -1;
 
 
 function valid_coord(grid, coord) {
   return coord[0] > -1 && coord[1] > -1 && coord[0] < grid.length && coord[1] < grid.length;
-}
-
-
-function can_afford_action(cost, reserve) {
-  return cost < reserve;
-}
-
-function unit_cost(specs, unit) {
-  return specs["UNITS"][specs[unit]]["CONSTRUCTION_FUEL"];
-}
-
-
-
-// Encapsulates an array of coordinates which form a path.
-class Path {
-  constructor() {
-    this.cells = [];
-    this.pos = 0;
-  }
-  valid() {
-    return this.cells.length > 0;
-  }
-  next() {
-    var cell = undefined;
-    if (this.cells.length > 0 && this.pos < this.cells.length) {
-      cell = this.cells[this.pos];
-      this.pos++;
-    } else if (this.pos >= this.cells.length) {
-      cell = END_OF_PATH;
-    } else {
-      cell = undefined;
-    }
-    return cell;
-  }
-
-  make(grid, start, goal, speed=SPECS['PILGRIM'].SPEED) {
-    this.pos = 0;
-    this.cells = best_first_search(grid, start, goal, speed);
-  }
 }
 
 // Controls behavior for crusader.
@@ -112,12 +73,15 @@ class CrusaderState {
 }
 
 // Set of behaviors for a castle.
+// A finite state machine
 class CastleState {
   constructor() {
     this.currentState = this.initialState;
     this.build_q = [];
   }
 
+  // SWAPPIN' STATE
+  // https://www.youtube.com/watch?v=rcWhqrymYD8
   changeState(nextState) {
     this.currentState = nextState;
   }
@@ -129,7 +93,7 @@ class CastleState {
 
   // Build crusaders for the next 5 turns
   initialState(castle) {
-    for (var i = 0; i < 1; ++i) {
+    for (var i = 0; i < 4; ++i) {
       this.build_q.push(SPECS['CRUSADER']);
     }
     this.changeState(this.buildState);
@@ -199,10 +163,18 @@ class MyRobot extends BCAbstractRobot {
     return enemies;
   }
 
+  /**
+   * Is robot on enemy team?
+   * @returns boolean
+   */
   is_enemy(robot) {
     return robot.team !== this.me.team;
   }
 
+  /**
+   * Attack enemy robot.
+   * @param enemy 
+   */
   attack_enemy(enemy) {
     return this.attack(this.me.x - enemy[0], this.me.y - enemy[1]);
   }
@@ -260,14 +232,6 @@ class MyRobot extends BCAbstractRobot {
 
   log_value(desc, value) {
     this.log(desc + value.toString());
-  }
-
-  convert_boolean_map(map) {
-    var converted_map = [];
-    for (var i = 0; i < map.length; i++) {
-      converted_map.push(map[i].map(Number));
-    }
-    return converted_map;
   }
 
 }
