@@ -42,7 +42,7 @@ class CrusaderState {
    * @param {MyRobot} crusader 
    */
   moveState(crusader) {
-    if (Math.floor(manhattan(crusader.my_pos(), [this.destination.x, this.destination.y])) === 1) {
+    if (Math.floor(manhattan(crusader.my_pos(), [this.destination.x, this.destination.y])) === 0) {
       this.change_state(this.attackState);
       return this.act(crusader);
     }
@@ -102,10 +102,10 @@ class CastleState {
   // Goto idle state
   initialState(castle) {
     this.changeState(this.idleState);
-    return this.act(castle);
+    return this.buildState(castle);
   }
 
-  // Pump out units in build queue one unit at a time.
+  // Pump out one unit at a time.
   buildState(castle) {
     var unit = this.to_build;
     var dAdj = [[0, 1], [1, 0], [-1, 0], [0, -1], [1, 1], [-1, -1], [-1, 1], [1, -1]];
@@ -127,7 +127,7 @@ class CastleState {
     if (SPECS.UNITS[CRUSADER_TYPE].CONSTRUCTION_FUEL < castle.fuel &&
         SPECS.UNITS[CRUSADER_TYPE].CONSTRUCTION_KARBONITE < castle.karbonite) {
       this.changeState(this.buildState);
-      return this.act(castle);
+      return;
     }
     return;
   }
