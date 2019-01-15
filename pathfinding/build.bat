@@ -6,4 +6,4 @@ copy "node.js" "c:/Users/absna/AppData/Roaming/npm/node_modules/bc19/bots/my_bot
 copy "path.js" "c:/Users/absna/AppData/Roaming/npm/node_modules/bc19/bots/my_bot"
 copy "pathfinder.js" "c:/Users/absna/AppData/Roaming/npm/node_modules/bc19/bots/my_bot"
 cd "c:/Users/absna/AppData/Roaming/npm/node_modules/bc19/bots"
-bc19run -r my_bot -b example_js
+bc19run -r my_bot -b example_js --chi=1000
