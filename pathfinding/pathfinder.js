@@ -17,7 +17,7 @@ const G_COST = 1;
 		
 		var realSpeed; //speed converted to r units
 		for(var i=1; i**2<=speed;i++){
-			realSpeed = i**2;
+			realSpeed = i;
 		}
 		
 		//only consider points +/- realSpeed from cell
