@@ -195,7 +195,7 @@ class CrusaderState {
   attackState(crusader) {
     var self = crusader;
     // get attackable robots
-    var attackable = self.visible.filter((r) => {
+    var attackable = self.getVisibleRobots().filter((r) => {
       if (! self.isVisible(r)){
           return false;
       }
@@ -211,7 +211,7 @@ class CrusaderState {
       var r = attackable[0];
       crusader.log('' + r);
       crusader.log('attacking! ' + r + ' at loc ' + (r.x - crusader.me.x, r.y - crusader.me.y));
-      return this.attack(r.x - crusader.me.x, r.y - crusader.me.y);
+      return crusader.attack(r.x - crusader.me.x, r.y - crusader.me.y);
     }
     return;
   }
