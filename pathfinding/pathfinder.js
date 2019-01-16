@@ -57,7 +57,7 @@ function is_over(open_set, end) {
     return true;
   } else {
     let curr = open_set.top().coord;
-    return (curr[0] === end && curr[1] === end[1]);
+    return (curr[0] === end[0] && curr[1] === end[1]);
   }
 }
 
@@ -75,10 +75,9 @@ function a_star(grid, start, end, speed) {
   var open_set = new BinaryHeap(function(element) {return element.f;});
   open_set.push(new AStarNode(0, start, undefined, 0));
   var closed = new Set();
-  closed.add(start);
 
   while (!is_over(open_set, end)) {
-    var current = open_set.pop();
+    let current = open_set.pop();
     let cost = current.g + G_COST;
     closed.add(current.coord.toString());
     var unvisited_n = [];
@@ -88,7 +87,7 @@ function a_star(grid, start, end, speed) {
       }
     }
     for (let i = 0; i < unvisited_n.length; ++i) {
-      open_set.push(new AStarNode(cost + manhattan(unvisited_n[i], end), unvisited_n[i], current, cost));
+      open_set.push(new AStarNode(cost + tie_breaker_manhattan(unvisited_n[i], end), unvisited_n[i], current, cost));
     }
   }
   return trace_path(open_set.top());
