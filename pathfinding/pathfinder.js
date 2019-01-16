@@ -115,4 +115,4 @@ function trace_path(end) {
 }
 
 
-export { manhattan, a_star, best_first_search };
+export { manhattan, a_star };
