@@ -13,25 +13,27 @@ const G_COST = 1;
 	//returns the set of all coordinates that are neighbors to cell given the speed
 	//		each element of the set is an array where the 0 element is the x component and the 1 element is the y
 	function neighbors(grid, cell, speed) {
+		const relative_neighbors = {'4':[[0,1],[1,0],[1,1],[2,0],[0,2],
+										[0,-1],[1,-1],[0,-2],
+										[-1,0],[-1,1],[-2,0],
+										[-1,-1]],
+									'9':[[0,1],[1,0],[1,1],[2,0],[0,2],
+										[0,-1],[1,-1],[0,-2],
+										[-1,0],[-1,1],[-2,0],
+										[-1,-1],
+										[0,3],[0,-3],[3,0],[-3,0],
+										[1,2],[-1,2],[1,-2],[-1,-2],
+										[2,1],[-2,1],[2,-1],[-2,-1]]};
+		
 		var neighborCells = new Set(); //set of nieghbors to be returned
 		
-		var realSpeed; //speed converted to r units
-		for(var i=1; i**2<=speed;i++){
-			realSpeed = i;
-		}
-		
-		//only consider points +/- realSpeed from cell
-		for(var x=-realSpeed;x<=realSpeed;x++){
-			for(var y=-realSpeed;y<=realSpeed;y++){
-				//point is within speed radius
-				if((x**2+y**2)<=speed){
-					//point is in bounds
-					if(cell.x+x>=0 && cell.x+x<grid.length && cell.y+y>=0 && cell.y+y<grid.length){
-						//point is passable
-						if(grid[cell.y+y][cell.x+x]===true){
-							neighborCells.add([cell.x+x,cell.y+y]);
-						}
-					}
+		//for all potential neighbors
+		for(var i in relative_neighbors[speed]){
+			//in bounds
+			if(cell.x+i[0]>=0 && cell.x+i[0]<grid.length && cell.y+i[1]>=0 && cell.y+i[1]<grid.length){
+				//point is passable
+				if(grid[cell.y+i[1]][cell.x+i[0]]===true){
+					neighborCells.add([cell.x+i[0],cell.y+i[1]]);
 				}
 			}
 		}
