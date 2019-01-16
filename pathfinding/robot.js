@@ -79,18 +79,34 @@ class CrusaderState {
 			var half = Math.floor(crusader.map.length/2);
 			if(isHorizontalReflection(crusader.map)){
 				if(crusader.me.y<half){
-					return [Math.floor(Math.random()*crusader.map.length),Math.floor(Math.random()*half)];
+					let randPoint = [Math.floor(Math.random()*crusader.map.length),Math.floor(Math.random()*half)];
+					while(!crusader.map[randPoint[1]][randPoint[0]]){
+						randPoint = [Math.floor(Math.random()*crusader.map.length),Math.floor(Math.random()*half)];
+					}
+					return randPoint;
 				}
 				else{
-					return [Math.floor(Math.random()*crusader.map.length),Math.floor(Math.random()*half)+half];
+					let randPoint = [Math.floor(Math.random()*crusader.map.length),Math.floor(Math.random()*half)+half];
+					while(!crusader.map[randPoint[1]][randPoint[0]]){
+						randPoint = [Math.floor(Math.random()*crusader.map.length),Math.floor(Math.random()*half)+half];
+					}
+					return randPoint;
 				}
 			}
 			else{
 				if(crusader.me.x<half){
-					return [Math.floor(Math.random()*half),Math.floor(Math.random()*crusader.map.length)];
+					let randPoint [Math.floor(Math.random()*half),Math.floor(Math.random()*crusader.map.length)];
+					while(!crusader.map[randPoint[1]][randPoint[0]]){
+						randPoint [Math.floor(Math.random()*half),Math.floor(Math.random()*crusader.map.length)];
+					}
+					return randPoint;
 				}
 				else {
-					return [Math.floor(Math.random()*half)+half,Math.floor(Math.random()*crusader.map.length)];
+					let randPoint [Math.floor(Math.random()*half)+half,Math.floor(Math.random()*crusader.map.length)];
+					while(!crusader.map[randPoint[1]][randPoint[0]]){
+						randPoint [Math.floor(Math.random()*half)+half,Math.floor(Math.random()*crusader.map.length)];
+					}
+					return randPoint;
 				}
 			}
 		};
