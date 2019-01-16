@@ -28,7 +28,7 @@ const G_COST = 1;
 		var neighborCells = new Set(); //set of nieghbors to be returned
 		
 		//for all potential neighbors
-		for(var i in relative_neighbors[speed]){
+		for(var i of relative_neighbors[speed]){
 			//in bounds
 			if(cell.x+i[0]>=0 && cell.x+i[0]<grid.length && cell.y+i[1]>=0 && cell.y+i[1]<grid.length){
 				//point is passable
