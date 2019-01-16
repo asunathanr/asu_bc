@@ -95,14 +95,14 @@ class CrusaderState {
 			}
 			else{
 				if(crusader.me.x<half){
-					let randPoint [Math.floor(Math.random()*half),Math.floor(Math.random()*crusader.map.length)];
+					let randPoint = [Math.floor(Math.random()*half),Math.floor(Math.random()*crusader.map.length)];
 					while(!crusader.map[randPoint[1]][randPoint[0]]){
-						randPoint [Math.floor(Math.random()*half),Math.floor(Math.random()*crusader.map.length)];
+						randPoint = [Math.floor(Math.random()*half),Math.floor(Math.random()*crusader.map.length)];
 					}
 					return randPoint;
 				}
 				else {
-					let randPoint [Math.floor(Math.random()*half)+half,Math.floor(Math.random()*crusader.map.length)];
+					let randPoint = [Math.floor(Math.random()*half)+half,Math.floor(Math.random()*crusader.map.length)];
 					while(!crusader.map[randPoint[1]][randPoint[0]]){
 						randPoint [Math.floor(Math.random()*half)+half,Math.floor(Math.random()*crusader.map.length)];
 					}
