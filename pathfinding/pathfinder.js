@@ -1,7 +1,6 @@
 import AStarNode from './astar_node.js';
 import BinaryHeap from './binary_heap.js';
 import Cache from './cache.js';
-import Node from './node.js';
 
 const G_COST = 1;
 
@@ -50,51 +49,18 @@ function manhattan(pos1, pos2) {
 var manhattan_cache = new Cache();
 
 function tie_breaker_manhattan(pos1, pos2) {
-  var dist = 0;
-  var key = pos1.toString().concat(pos2.toString());
-  if (manhattan_cache.has(key)) {
-    dist = manhattan_cache.get(key);
+  return manhattan(pos1, pos2) * (1.0 + 1/1000);
+}
+
+function is_over(open_set, end) {
+  if (open_set.size() === 0) {
+    return true;
   } else {
-    dist = manhattan(pos1, pos2) * (1.0 + 1/1000);
-    manhattan_cache.add(key);
+    let curr = open_set.top().coord;
+    return (curr[0] === end && curr[1] === end[1]);
   }
-  return dist;
 }
 
-/**
- * Finds path from start to end using Greedy Best First Search.
- * It is meant to be fast but not necessarily accurate.
- * Will be replaced with something more accurate once robot.js is stable.
- * @todo Add Error checking for oob destination.
- * @param {Array<boolean>} grid 
- * @param {Array<Array<number>>} start 
- * @param {Array<Array<number>>} end 
- */
-function best_first_search(grid, start, end, speed) {
-  var open_set = new BinaryHeap(function(element) {return element.f;});
-  open_set.push(new Node(0, start, undefined, 0));
-  var closed = new Set();
-  closed.add(start);
-
-  while (open_set.size() !== 0) {
-    var current = open_set.pop();
-    if (end[0] === current.coord[0] && end[1] === current.coord[1]) {
-      return trace_path(current);
-    }
-    closed.add(current.coord.toString());
-    var unvisited_n = [];
-    for (var neighbor of neighbors(grid, {x: current.coord[0], y: current.coord[1]}, speed)) {
-      if (!closed.has(neighbor.toString())) {
-        unvisited_n.push(neighbor);
-      }
-    }
-    for (let i = 0; i < unvisited_n.length; ++i) {
-      var cost = current.g + G_COST;
-      open_set.push(new Node(cost + manhattan(unvisited_n[i], end), unvisited_n[i], current, cost));
-    }
-  }
-  return Error('Unable to find path.');
-}
 
 /**
  * Finds path from start to end using A*.
@@ -107,15 +73,13 @@ function best_first_search(grid, start, end, speed) {
  */
 function a_star(grid, start, end, speed) {
   var open_set = new BinaryHeap(function(element) {return element.f;});
-  open_set.push(new AStarNode(0, start, undefined, 1));
+  open_set.push(new AStarNode(0, start, undefined, 0));
   var closed = new Set();
   closed.add(start);
 
-  while (open_set.size() !== 0) {
+  while (!is_over(open_set, end)) {
     var current = open_set.pop();
-    if (end[0] === current.coord[0] && end[1] === current.coord[1]) {
-      return trace_path(current);
-    }
+    let cost = current.g + G_COST;
     closed.add(current.coord.toString());
     var unvisited_n = [];
     for (var neighbor of neighbors(grid, {x: current.coord[0], y: current.coord[1]}, speed)) {
@@ -124,13 +88,16 @@ function a_star(grid, start, end, speed) {
       }
     }
     for (let i = 0; i < unvisited_n.length; ++i) {
-      open_set.push(new AStarNode(manhattan(unvisited_n[i], end), unvisited_n[i], current));
+      open_set.push(new AStarNode(cost + manhattan(unvisited_n[i], end), unvisited_n[i], current, cost));
     }
   }
-  return Error('Unable to find path.');
+  return trace_path(open_set.top());
 }
 
 function trace_path(end) {
+  if (end === undefined) {
+    return Error('Unable to find path.');
+  }
   if (end.parent === undefined) {
     return [];
   }

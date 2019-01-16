@@ -8,5 +8,4 @@ copy "node.js" "c:/Users/absna/AppData/Roaming/npm/node_modules/bc19/bots/my_bot
 copy "path.js" "c:/Users/absna/AppData/Roaming/npm/node_modules/bc19/bots/my_bot"
 copy "pathfinder.js" "c:/Users/absna/AppData/Roaming/npm/node_modules/bc19/bots/my_bot"
 cd "c:/Users/absna/AppData/Roaming/npm/node_modules/bc19/bots"
-
-bc19run --bc=compiled_bot.js --rc=compiled_bot.js
+bc19run -r my_bot -b my_bot

@@ -5,6 +5,13 @@ function BinaryHeap(scoreFunction){
 }
 
 BinaryHeap.prototype = {
+  top: function() {
+    if (this.content.length > 0) {
+      return this.content[0];
+    }
+    return undefined;
+  },
+
   push: function(element) {
     // Add the new element to the end of the array.
     this.content.push(element);
