@@ -1,3 +1,5 @@
+
+
 class AStarNode {
   constructor(f, coord, parent, g=1) {
     this.f = f;
@@ -151,6 +153,8 @@ class Cache {
     return this.cache.set(key, value);
   }
 }
+
+
 
 // export default BinaryHeap;
 
@@ -306,7 +310,7 @@ function print_grid(grid, path, start, end) {
   }
 }
 
-var grid = make_uniform_grid(10, 10);
-const START = [0, 0];
+var grid = make_uniform_grid(10, 50);
+const START = [5, 4];
 const END = [9, 9];
 print_grid(grid, a_star(grid, START, END, 9), START, END);

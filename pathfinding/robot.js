@@ -283,6 +283,9 @@ class MyRobot extends BCAbstractRobot {
     if (choice === END_OF_PATH) {
       return;
     } else {
+      if (!this.map[choice[1]][choice[0]]) {
+        this.log("Trying to move on invalid cell ", choice[0], ' ', choice[1]);
+      }
       return this.move(choice[0], choice[1]);
     }
     
