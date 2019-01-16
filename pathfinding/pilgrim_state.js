@@ -1,12 +1,12 @@
 import AbstractState from './abstract_state.js';
-
+import { nav } from 'nav.js';
 
 class PilgrimState extends AbstractState {
   constructor(pilgrim) {
     super();
     this.pilgrim = pilgrim;
-    this.destination;
-    this.origin = [this.pilgrim.me.x, this.pilgrim.me.y];
+    this.destination =  nav.getClosestKarbonite({x: pilgrim.me.x, y: pilgrim.me.y}, pilgrim.getKarboniteMap());
+    this.origin = {x: this.pilgrim.me.x, y:this.pilgrim.me.y};
   }
 
   check_state() {
@@ -30,14 +30,14 @@ class PilgrimState extends AbstractState {
   }
 
   move_state() {
-    if (this.pilgrim.me.x === this.destination[0]
-        && this.pilgrim.me.y === this.destination[1]) {
+    if (this.pilgrim.me.x === this.destination.x
+        && this.pilgrim.me.y === this.destination.y) {
           this.current_state = this.gather_state;
     }
   }
 
   gather_state() {
-    this.pilgrim.make_path(this.destination, this.origin);
+    this.pilgrim.make_path([this.destination.x, this.destination.y], [this.origin.x, this.origin.y]);
     this.current_state = this.move_state;
   }
 
