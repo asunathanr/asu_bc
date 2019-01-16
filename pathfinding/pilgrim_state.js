@@ -1,3 +1,6 @@
+import AbstractState from './abstract_state.js';
+
+
 class PilgrimState extends AbstractState {
   constructor(pilgrim) {
     super();
@@ -6,35 +9,39 @@ class PilgrimState extends AbstractState {
     this.origin = [this.pilgrim.me.x, this.pilgrim.me.y];
   }
 
-  checkState() {
+  check_state() {
     this.current_state = this.current_state();
   }
 
   act() {
-    let action = undefined;
+    let action = null;
     let state = this.current_state;
-    if (state === this.moveState) {
+    if (state === this.move_state) {
       action = this.pilgrim.move_unit();
-    } else if (state === this.gatherState) {
+    } else if (state === this.gather_state) {
       action = this.pilgrim.mine();
     } else {
     }
     return action;
   }
 
-  initialState() {
-
+  initial_state() {
+    this.current_state = this.move_state;
   }
 
-  moveState() {
-
+  move_state() {
+    if (this.pilgrim.me.x === this.destination[0]
+        && this.pilgrim.me.y === this.destination[1]) {
+          this.current_state = this.gather_state;
+    }
   }
 
-  gatherState() {
-
+  gather_state() {
+    this.pilgrim.make_path(this.destination, this.origin);
+    this.current_state = this.move_state;
   }
 
-  buildState() {
-    
+  build_state() {
+    this.current_state
   }
 }

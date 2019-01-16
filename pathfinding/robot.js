@@ -56,7 +56,7 @@ class CrusaderState {
 	// get attackable robots
 	var self = crusader;
 	var attackable = self.getVisibleRobots().filter((r) => {
-      if (! self.isVisible(r)){
+      if (!self.isVisible(r)){
           return false;
       }
       const dist = (r.x-self.me.x)**2 + (r.y-self.me.y)**2;
