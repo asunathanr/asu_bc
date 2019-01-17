@@ -90,6 +90,10 @@ class MyRobot extends BCAbstractRobot {
     
   }
 
+  my_pos() {
+    return [this.me.x, this.me.y];
+  }
+
   radius(pos, r) {
     var coords = [];
     for (var i = pos[0] - r; i < pos[0] + r; ++i) {
@@ -102,12 +106,12 @@ class MyRobot extends BCAbstractRobot {
     return coords;
   }
 
-  my_pos() {
-    return [this.me.x, this.me.y];
-  }
-
   reverse_path() {
     path.reverse();
+  }
+
+  at_goal() {
+    return path.at_path_end();
   }
 
   make_path(start, goal) {

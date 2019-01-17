@@ -8,9 +8,9 @@ const END_OF_PATH = -1;
  * @property pos: The current cell in path.
  */
 class Path {
-  constructor() {
-    this.cells = [];
-    this.pos = 0;
+  constructor(cells = [], pos = 0) {
+    this.cells = cells
+    this.pos = pos;
   }
 
   valid() {
@@ -22,9 +22,12 @@ class Path {
   }
 
   at_path_end() {
-    return this.pos >= this.cells.length;
+    return this.pos >= this.cells.length || this.empty();
   }
 
+  /**
+   * Travel to next cell in path
+   */
   next() {
     var cell = undefined;
     if (this.cells.length > 0 && this.pos < this.cells.length) {
@@ -33,9 +36,29 @@ class Path {
     } else if (this.pos >= this.cells.length) {
       cell = END_OF_PATH;
     } else {
-      cell = undefined;
+      cell = Error('No new path');
     }
     return cell;
+  }
+
+  /**
+   * Retrieve previous node
+   */
+  prev() {
+    if (this.pos === 0) {
+      return undefined;
+    } else {
+      this.pos--;
+      return this.cells[this.pos];
+    }
+  }
+
+  curr() {
+    if (this.valid()) {
+      return this.cells[this.pos];
+    } else {
+      return undefined;
+    }
   }
 
   reverse() {
@@ -44,6 +67,7 @@ class Path {
       return [-cell[0], -cell[1]];
     });
     this.pos = 0;
+    return new Path(this.cells, this.pos);
   }
 
   make(grid, start, goal, speed) {
