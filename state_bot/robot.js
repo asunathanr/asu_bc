@@ -2,6 +2,7 @@ import { BCAbstractRobot, SPECS } from 'battlecode';
 import nav from './nav.js';
 import { END_OF_PATH, Path } from './path.js';
 import { manhattan } from './pathfinder.js';
+import { PilgrimState } from './pilgrim_state.js';
 import { CastleState } from './CastleState.js';
 import { CrusaderState } from './CrusaderState.js';
 
@@ -39,8 +40,9 @@ class MyRobot extends BCAbstractRobot {
       state = new CrusaderState(this);
     } else if (unit_type === SPECS.CASTLE) {
       state = new CastleState(this);
-    }
-    else {
+    } else if (unit_type === SPECS.PILGRIM) {
+      state = new PilgrimState(this);
+    } else {
       throw Error('NO STATE!!!');
     }
   }
@@ -68,7 +70,7 @@ class MyRobot extends BCAbstractRobot {
 
   /**
    * Attack enemy robot.
-   * @param enemy 
+   * @param enemy Must be enemy.
    */
   attack_enemy(enemy) {
     return this.attack(this.me.x - enemy[0], this.me.y - enemy[1]);
@@ -102,6 +104,10 @@ class MyRobot extends BCAbstractRobot {
 
   my_pos() {
     return [this.me.x, this.me.y];
+  }
+
+  reverse_path() {
+    path.reverse();
   }
 
   make_path(start, goal) {

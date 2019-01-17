@@ -2,6 +2,7 @@ import { AbstractState } from './AbstractState.js';
 import { SPECS } from 'battlecode';
 
 const CRUSADER_TYPE = SPECS.CRUSADER;
+const PILGRIM_TYPE = SPECS.PILGRIM;
 
 /**
  * CastleState is the state machine for the Castle units
@@ -20,6 +21,7 @@ export class CastleState extends AbstractState {
         this.current_state = this.initial_state; //all robots start at an initial state
         this.castle = castle;
         this.build_locations = [];
+        this.prev_unit = PILGRIM_TYPE;
     }
 
     /**
@@ -91,7 +93,8 @@ export class CastleState extends AbstractState {
             var chosenPosIndex = Math.floor(Math.random() * this.build_locations.length);
             var chosenPos = this.build_locations[chosenPosIndex];
             var chosenDxy = [this.castle.me.x - chosenPos[0], this.castle.me.y - chosenPos[1]];
-            return this.castle.buildUnit(CRUSADER_TYPE, chosenDxy[1], chosenDxy[0]);
+            let build_type = this.pick_unit();
+            return this.castle.buildUnit(build_type, chosenDxy[1], chosenDxy[0]);
         }
         else if (this.current_state === this.idle_state) {
             return;
@@ -99,5 +102,21 @@ export class CastleState extends AbstractState {
         else {
             return Error("Invalid State, cannot act");
         }
+    }
+
+    /**
+     * Picks which unit to build.
+     * Hides unit decision logic from other parts of code.
+     * @returns Which unit to build.
+     */
+    pick_unit() {
+        let unit = CRUSADER_TYPE;
+        if (this.prev_unit === PILGRIM_TYPE) {
+            unit = CRUSADER_TYPE;
+        } else {
+            unit = PILGRIM_TYPE;
+        }
+        this.prev_unit = unit;
+        return unit;
     }
 }

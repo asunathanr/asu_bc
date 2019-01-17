@@ -120,72 +120,19 @@ nav.sqDist = (start, end) => {
     return Math.pow(start.x - end.x, 2) + Math.pow(start.y - end.y, 2);
 };
 
-//isHorizontalReflection
-	//grid 2d boolean array where true is passable terrain.
-	//
-	//returns true if map is horizontaly symmetric
-	//returns false if map is vertically symmetric
-nav.isHorizontalReflection = (grid) => {
-		//check NW quad against its neighbor quads
-		for(var i=0;i<Math.floor(grid.length/2);i++){
-			for(var j=0;j<Math.floor(grid.length/2);j++){
-				//check against NE quad
-				//might be vertically symmetric
-				if(grid[j][i]===grid[j][grid.length-i-1]){
-					//may be coincidence check SW quad
-					//is coincidence
-					if(grid[j][i]===grid[grid.length-j-1][i]){
-						continue;
-					}
-					//not coincidence is vertically symmetric
-					else{
-						return false;
-					}
-				}
-				//is horizontal reflection
-				else{
-					return true;
-				}
-			}
-		}
-		//todo: implement handling for perfectly symmetric map
-		return Error('failed to compute map symmetry');
-}
-
-nav.getRandHalfGrid = (unit) => {
-    var half = Math.floor(unit.map.length/2);
-    if(nav.isHorizontalReflection(unit.map)){
-        if(unit.me.y<half){
-            let randPoint = [Math.floor(Math.random()*unit.map.length),Math.floor(Math.random()*half)];
-            while(!unit.map[randPoint[1]][randPoint[0]]){
-                randPoint = [Math.floor(Math.random()*unit.map.length),Math.floor(Math.random()*half)];
+nav.getClosestKarbonite = (loc, karbMap) => {
+    const mapLen = karbMap.length;
+    let closestLoc = null;
+    let closestDist = 100000; // Large number;
+    for (let y = 0; y < mapLen; y++) {
+        for (let x = 0; x < mapLen; x++) {
+            if (karbMap[y][x] && nav.sqDist({x,y}, loc) < closestDist) {
+                closestDist = nav.sqDist({x,y}, loc);
+                closestLoc = {x,y};
             }
-            return randPoint;
-        }
-        else{
-            let randPoint = [Math.floor(Math.random()*unit.map.length),Math.floor(Math.random()*half)+half];
-            while(!unit.map[randPoint[1]][randPoint[0]]){
-                randPoint = [Math.floor(Math.random()*unit.map.length),Math.floor(Math.random()*half)+half];
-            }
-            return randPoint;
         }
     }
-    else{
-        if(unit.me.x<half){
-            let randPoint = [Math.floor(Math.random()*half),Math.floor(Math.random()*unit.map.length)];
-            while(!unit.map[randPoint[1]][randPoint[0]]){
-                randPoint = [Math.floor(Math.random()*half),Math.floor(Math.random()*unit.map.length)];
-            }
-            return randPoint;
-        }
-        else {
-            let randPoint = [Math.floor(Math.random()*half)+half,Math.floor(Math.random()*unit.map.length)];
-            while(!unit.map[randPoint[1]][randPoint[0]]){
-                randPoint [Math.floor(Math.random()*half)+half,Math.floor(Math.random()*unit.map.length)];
-            }
-            return randPoint;
-        }
-    }
-}
+    return closestLoc;
+};
 
 export default nav;

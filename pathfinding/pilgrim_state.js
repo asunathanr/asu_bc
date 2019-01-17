@@ -1,9 +1,10 @@
 import AbstractState from './abstract_state.js';
-import { nav } from 'nav.js';
+import nav from 'nav.js';
 
 class PilgrimState extends AbstractState {
   constructor(pilgrim) {
     super();
+    this.current_state = this.initial_state;
     this.pilgrim = pilgrim;
     this.destination =  nav.getClosestKarbonite({x: pilgrim.me.x, y: pilgrim.me.y}, pilgrim.getKarboniteMap());
     this.origin = {x: this.pilgrim.me.x, y:this.pilgrim.me.y};
