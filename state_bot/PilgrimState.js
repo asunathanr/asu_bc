@@ -41,7 +41,7 @@ export class PilgrimState extends AbstractState {
     if (DEBUG) {
       this._log_state();
     }
-    return this.actions.get(this.current_state).bind(this);
+    return this.actions.get(this.current_state).bind(this)();
   }
 
 
@@ -63,9 +63,9 @@ export class PilgrimState extends AbstractState {
 
   gather_state() {
     if (this.destination.x !== this.pilgrim.my_pos()[0] && this.destination.y !== this.pilgrim.my_pos()[1]) {
-      return this.gather_state;
-    } else {
       return this.travel_to_castle_state;
+    } else {
+      return this.gather_state;
     }
   }
 
@@ -81,8 +81,8 @@ export class PilgrimState extends AbstractState {
   // ACTIONS
 
   gather_action() {
-    pilgrim.make_path(this.pilgrim.my_pos(), [this.origin.x, this.origin.y]);
-    return pilgrim.mine();
+    this.pilgrim.make_path(this.pilgrim.my_pos(), [this.origin.x, this.origin.y]);
+    return this.pilgrim.mine();
   }
 
   travel_to_castle_action() {
