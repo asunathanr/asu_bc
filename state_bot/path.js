@@ -17,6 +17,10 @@ class Path {
     return this.cells.length > 0;
   }
 
+  empty() {
+    return this.cells.length === 0;
+  }
+
   at_path_end() {
     return this.pos >= this.cells.length;
   }

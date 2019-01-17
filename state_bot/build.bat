@@ -9,4 +9,4 @@ xcopy . "c:/Users/absna/AppData/Roaming/npm/node_modules/bc19/bots/my_bot"
 
 cd "c:/Users/absna/AppData/Roaming/npm/node_modules/bc19/bots"
 rem Run instance of game with copied bots.
-bc19run -r my_bot -b example_js
+bc19run -r "my_bot" -b "example_js"
