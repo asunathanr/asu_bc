@@ -2,7 +2,7 @@ import { BCAbstractRobot, SPECS } from 'battlecode';
 import nav from './nav.js';
 import { END_OF_PATH, Path } from './path.js';
 import { manhattan } from './pathfinder.js';
-import { PilgrimState } from './pilgrim_state.js';
+import { PilgrimState } from './PilgrimState.js';
 import { CastleState } from './CastleState.js';
 import { CrusaderState } from './CrusaderState.js';
 

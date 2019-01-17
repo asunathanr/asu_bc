@@ -3,6 +3,14 @@ import { SPECS } from './battlecode';
 import { Path } from './path.js';
 import nav from 'nav.js';
 
+
+/**
+ * State machine to control pilgrim units.
+ * @property current_state: Which state to act upon next.
+ * @property {MyRobot} pilgrim: The pilgrim to API interface class.
+ * @property castle_dxy: Where to deposit resources.
+ * @property path: The set path between resource cell and delivery position.
+ */
 export class PilgrimState extends AbstractState {
   constructor(pilgrim) {
     super();
