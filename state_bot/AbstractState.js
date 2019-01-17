@@ -4,15 +4,13 @@
  *           state and change state accordingly.
  * @property unit: stores the MyRobot object which contains this class.
  */
-class AbstractState {
+export class AbstractState {
 
     /**
      * @param unit: is the MyRobot object (would be this the the clas that contains this class)
      */
     constructor (unit) {
-        this.current_state = this.intial_state; //all robots start at an initial state
-        this.unit = unit;
-        throw Error("Absract Class!");
+        
     }
 
     /**
@@ -29,7 +27,7 @@ class AbstractState {
      * check_state changes the current_state based on the game state of unit
      */
     check_state () {
-        this.current_state = current_state();
+        this.current_state = this.current_state();
         throw Error("Abstract Class!");
     }
 
@@ -40,5 +38,3 @@ class AbstractState {
         throw Error("Abstract Class!");
     }
 }
-
-export default AbstractState; 
