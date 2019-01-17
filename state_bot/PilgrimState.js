@@ -19,17 +19,18 @@ export class PilgrimState extends AbstractState {
     super();
     this.current_state = this.initial_state;
     this.pilgrim = pilgrim;
-    this.castle_dxy = this._detect_castle();
     this.destination = nav.getClosestKarbonite({x: pilgrim.me.x, y: pilgrim.me.y}, pilgrim.getKarboniteMap());
-    this.origin = {x: this.pilgrim.me.x, y:this.pilgrim.me.y};
-    this.path = new Path();
-    this.deposit_path = undefined;
-    this.path.make(this.pilgrim.map, this.pilgrim.my_pos(), [this.destination.x, this.destination.y], SPECS.UNITS[pilgrim.me.unit].SPEED);
+    this.origin = {x: this.pilgrim.me.x, y: this.pilgrim.me.y};
+    this.pilgrim.make_path(this.pilgrim.my_pos(), [this.destination.x, this.destination.y]);
     this.actions = this._make_actions();
   }
 
   initial_state() {
-    return this.travel_to_resource_state;
+    if (this.destination.x === this.pilgrim.my_pos()[0] && this.destination.y === this.pilgrim.my_pos()[1]) {
+      return this.gather_state;
+    } else {
+      return this.travel_to_resource_state;
+    }
   }
 
   check_state() {
@@ -40,35 +41,35 @@ export class PilgrimState extends AbstractState {
     if (DEBUG) {
       this._log_state();
     }
-    let action = this.actions.get(this.current_state);
-    this.pilgrim.log("Current action " + action.toString());
-    return action;
+    return this.actions.get(this.current_state).bind(this);
   }
 
 
   // STATES
 
   travel_to_resource_state() {
-    if (this.path.at_path_end()) {
+    if (this.pilgrim.at_goal()) {
       return this.gather_state;
     }
     return this.travel_to_resource_state;
   }
 
   travel_to_castle_state() {
-    if (this.path.at_path_end()) {
+    if (this.pilgrim.at_goal()) {
       return this.deposit_state;
     }
     return this.travel_to_castle_state;
   }
 
   gather_state() {
-    this.path.reverse();
-    return this.travel_to_castle_state;
+    if (this.destination.x !== this.pilgrim.my_pos()[0] && this.destination.y !== this.pilgrim.my_pos()[1]) {
+      return this.gather_state;
+    } else {
+      return this.travel_to_castle_state;
+    }
   }
 
   deposit_state() {
-    this.path.reverse();
     return this.travel_to_resource_state;
   }
 
@@ -76,34 +77,26 @@ export class PilgrimState extends AbstractState {
     return this.move_state;
   }
 
+
   // ACTIONS
 
   gather_action() {
-    return this.pilgrim.mine();
+    pilgrim.make_path(this.pilgrim.my_pos(), [this.origin.x, this.origin.y]);
+    return pilgrim.mine();
   }
 
   travel_to_castle_action() {
-    if (this.path.at_path_end()) {
+    if (self.pilgrim.at_goal()) {
       return; 
     }
-    if (this.deposit_path === undefined) {
-      this.deposit_path = new Path();
-      this.deposit_path.make(
-        this.pilgrim.map,
-        this.pilgrim.my_pos(),
-        this._detect_castle(),
-        SPECS.UNITS[pilgrim.me.unit].SPEED);
-    }
-    let choice = this.path.next();
-    return this.pilgrim.move(choice[0], choice[1]);
+    return this.pilgrim.move_unit();
   }
 
   travel_to_resource_action() {
-    if (this.path.at_path_end()) {
+    if (this.pilgrim.at_goal()) {
       return;
     }
-    let choice = this.path.next();
-    return this.pilgrim.move(choice[0], choice[1]);
+    return this.pilgrim.move_unit();
   }
 
   build_action() {
@@ -126,6 +119,12 @@ export class PilgrimState extends AbstractState {
       str = "Pilgrim " + this.pilgrim.id.toString() + " is gathering resources.";
     } else if (this.current_state === this.deposit_state) {
       str = "Pilgrim " + this.pilgrim.id.toString() + " is depositing resources.";
+    } else if (this.current_state === this.travel_to_castle_state) {
+      str = "Pilgrim is traveling to castle";
+    } else if (this.current_state === this.travel_to_resource_state) {
+      str = "Pilgrim is traveling to resource";
+    } else {
+      str = "Unknown state";
     }
     this.pilgrim.log(str);
   }
