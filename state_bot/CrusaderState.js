@@ -122,8 +122,10 @@ export class CrusaderState extends AbstractState{
         }
         else if(this.current_state===this.attack_state){
             var r = this.attackable[0];
+            /*
             this.crusader.log('' + r);
             this.crusader.log('attacking! ' + r + ' at loc ' + (r.x - this.crusader.me.x, r.y - this.crusader.me.y));
+            */
             return this.crusader.attack(r.x - this.crusader.me.x, r.y - this.crusader.me.y);
         }
         else {
