@@ -21,7 +21,7 @@ export class CastleState extends AbstractState {
         this.current_state = this.initial_state; //all robots start at an initial state
         this.castle = castle;
         this.build_locations = [];
-        this.prev_unit = PILGRIM_TYPE;
+        this.prev_unit = null;
     }
 
     /**
@@ -111,9 +111,10 @@ export class CastleState extends AbstractState {
      */
     pick_unit() {
         let unit = CRUSADER_TYPE;
-        if (this.prev_unit === PILGRIM_TYPE) {
+        if (this.prev_unit !== null) {
             unit = CRUSADER_TYPE;
-        } else {
+        } 
+        else {
             unit = PILGRIM_TYPE;
         }
         this.prev_unit = unit;

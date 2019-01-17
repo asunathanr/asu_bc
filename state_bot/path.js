@@ -39,6 +39,7 @@ class Path {
     this.cells = reversedPath.map((cell) => {
       return [-cell[0], -cell[1]];
     });
+    this.pos = 0;
   }
 
   make(grid, start, goal, speed) {

@@ -9,6 +9,7 @@ import nav from 'nav.js';
  * @property current_state: Which state to act upon next.
  * @property {MyRobot} pilgrim: The pilgrim to API interface class.
  * @property castle_dxy: Where to deposit resources.
+ * @property destination: Resource location.
  * @property path: The set path between resource cell and delivery position.
  */
 export class PilgrimState extends AbstractState {
@@ -21,6 +22,10 @@ export class PilgrimState extends AbstractState {
     this.origin = {x: this.pilgrim.me.x, y:this.pilgrim.me.y};
     this.path = new Path();
     this.path.make(this.pilgrim.map, this.pilgrim.my_pos(), [this.destination.x, this.destination.y], SPECS.UNITS[pilgrim.me.unit].SPEED);
+  }
+
+  initial_state() {
+    return this.travel_to_resource_state;
   }
 
   check_state() {
@@ -46,19 +51,16 @@ export class PilgrimState extends AbstractState {
     return action;
   }
 
-  initial_state() {
-    return this.travel_to_resource_state;
-  }
-
+  
   travel_to_resource_state() {
-    if (this.path.at_path_end()) {
+    if (this.path.at_path_end() && this.pilgrim.karbonite == 0) {
       return this.gather_state;
     }
     return this.travel_to_resource_state;
   }
 
   travel_to_castle_state() {
-    if (this.path.at_path_end()) {
+    if (this.path.at_path_end() && this.pilgrim.karbonite > 0) {
       return this.deposit_state;
     }
     return this.travel_to_castle_state;

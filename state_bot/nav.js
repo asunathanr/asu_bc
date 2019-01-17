@@ -162,4 +162,8 @@ nav.isHorizontalReflection = (grid) => {
     return Error('failed to compute map symmetry');
 }
 
+nav.getRandHalfGrid = (crusader) => {
+    return {x:0, y:0};
+};
+
 export default nav;
