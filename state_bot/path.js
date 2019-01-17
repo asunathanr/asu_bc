@@ -14,7 +14,7 @@ class Path {
   }
 
   valid() {
-    return this.cells.length > 0;
+    return !this.empty() && this.pos < this.cells.length;
   }
 
   empty() {
