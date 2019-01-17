@@ -25,6 +25,9 @@ class Path {
     return this.pos >= this.cells.length || this.empty();
   }
 
+  /**
+   * Travel to next cell in path
+   */
   next() {
     var cell = undefined;
     if (this.cells.length > 0 && this.pos < this.cells.length) {
@@ -36,6 +39,26 @@ class Path {
       cell = Error('No new path');
     }
     return cell;
+  }
+
+  /**
+   * Retrieve previous node
+   */
+  prev() {
+    if (this.pos === 0) {
+      return undefined;
+    } else {
+      this.pos--;
+      return this.cells[this.pos];
+    }
+  }
+
+  curr() {
+    if (this.valid()) {
+      return this.cells[this.pos];
+    } else {
+      return undefined;
+    }
   }
 
   reverse() {
