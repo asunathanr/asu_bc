@@ -10,6 +10,7 @@ const PILGRIM_TYPE = SPECS.PILGRIM;
  *           state and change state accordingly.
  * @property castle: stores the MyRobot object which contains this class.
  * @property build_locations: a list of potential build locations (passable).
+ * @property attackable: robots in attack range of the castle.
  */
 export class CastleState extends AbstractState {
 
@@ -22,6 +23,7 @@ export class CastleState extends AbstractState {
         this.castle = castle;
         this.build_locations = [];
         this.prev_unit = null;
+        this.attackable = [];
     }
 
     /**
@@ -58,6 +60,20 @@ export class CastleState extends AbstractState {
         if (SPECS.UNITS[CRUSADER_TYPE].CONSTRUCTION_FUEL > this.castle.fuel ||
             SPECS.UNITS[CRUSADER_TYPE].CONSTRUCTION_KARBONITE > this.castle.karbonite) {
                 return this.idle_state;
+        } else 
+        return this.build_state;
+    }
+
+    attack_state() {
+        // get attackable robots
+	    this.attackable = this.castle.getAttackableRobots();
+        //if attackable units, go to attack_state
+        if(this.attackable.length > 0){
+            return this.attack_state;
+        }
+        else if (SPECS.UNITS[CRUSADER_TYPE].CONSTRUCTION_FUEL > this.castle.fuel ||
+            SPECS.UNITS[CRUSADER_TYPE].CONSTRUCTION_KARBONITE > this.castle.karbonite) {
+                return this.idle_state;
         }
         return this.build_state;
     }
@@ -68,11 +84,16 @@ export class CastleState extends AbstractState {
      *          else returns build_state
      */
     idle_state () {
-        if (SPECS.UNITS[CRUSADER_TYPE].CONSTRUCTION_FUEL > this.castle.fuel ||
-            SPECS.UNITS[CRUSADER_TYPE].CONSTRUCTION_KARBONITE > this.castle.karbonite) {
-                return this.idle_state;
+        if (SPECS.UNITS[CRUSADER_TYPE].CONSTRUCTION_FUEL < this.castle.fuel &&
+            SPECS.UNITS[CRUSADER_TYPE].CONSTRUCTION_KARBONITE < this.castle.karbonite) {
+                return this.build_state;
         }
-        return this.build_state;
+        this.attackable = this.castle.getAttackableRobots();
+        //if attackable units, go to attack_state
+        if(this.attackable.length > 0){
+            return this.attack_state;
+        }
+        return this.idle_state;
     }
 
     /**
@@ -98,6 +119,10 @@ export class CastleState extends AbstractState {
         }
         else if (this.current_state === this.idle_state) {
             return;
+        }
+        else if (this.current_state === this.attack_state){
+            var r = this.attackable[0];
+            return this.castle.attack(r.x - this.castle.me.x, r.y - this.castle.me.y);
         }
         else {
             return Error("Invalid State, cannot act");

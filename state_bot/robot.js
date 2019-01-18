@@ -131,6 +131,25 @@ class MyRobot extends BCAbstractRobot {
     this.log(desc + value);
   }
 
+  /**
+   * returns a list of attackable robots
+   */
+  getAttackableRobots() {
+    var self = this;
+    return self.getVisibleRobots().filter((r) => {
+      if (! self.isVisible(r)){
+          return false;
+      }
+      const dist = (r.x-self.me.x)**2 + (r.y-self.me.y)**2;
+      if (r.team !== self.me.team
+      && SPECS.UNITS[self.me.unit].ATTACK_RADIUS[0] <= dist
+      && dist <= SPECS.UNITS[self.me.unit].ATTACK_RADIUS[1]) {
+          return true;
+      }
+      return false;
+    });
+  }
+
 }
 
 var robot = new MyRobot();
