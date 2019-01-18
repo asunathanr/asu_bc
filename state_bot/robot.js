@@ -79,7 +79,6 @@ class MyRobot extends BCAbstractRobot {
   move_unit() {
     if (!path.valid()) {
       this.log("Unit: " + this.me.id.toString() + " is trying to move on invalid path.");
-      this.log("Path is: " + path.serialize());
       return;
     }
     var choice = path.next();

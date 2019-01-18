@@ -109,10 +109,10 @@ class LoopToDest {
   }
   
   _pick_nearest_resource() {
-    let nearest_karb = nav.getClosestKarbonite({x: pilgrim.me.x, y: pilgrim.me.y}, pilgrim.getKarboniteMap());
-    let nearest_fuel = nav.getClosestKarbonite({x: pilgrim.me.x, y: pilgrim.me.y}, pilgrim.getFuelMap());
-    let karb_dist = manhattan(this.pilgrim.my_pos(), [this.nearest_karb.x, this.nearest_karb.y]);
-    let fuel_dist = manhattan(this.pilgrim.my_pos(), [this.nearest_fuel.x, this.nearest_fuel.y]);
+    let nearest_karb = nav.getClosestKarbonite({x: this.pilgrim.me.x, y: this.pilgrim.me.y}, this.pilgrim.getKarboniteMap());
+    let nearest_fuel = nav.getClosestKarbonite({x: this.pilgrim.me.x, y: this.pilgrim.me.y}, this.pilgrim.getFuelMap());
+    let karb_dist = manhattan(this.pilgrim.my_pos(), [nearest_karb.x, nearest_karb.y]);
+    let fuel_dist = manhattan(this.pilgrim.my_pos(), [nearest_fuel.x, nearest_fuel.y]);
     return nearest_karb ? Math.min(karb_dist, fuel_dist) : nearest_fuel;
   }
 }
@@ -150,6 +150,9 @@ class LoopToCastle {
     return Error('Error: No Castles were visible when trying to deduce a drop-off point.');
   }
 
+  /**
+   * Pick an adjacent tile next to castle
+   */
   _choose_dump_point() {
     var castle = this._detect_castle();
     let adjPoints = [];

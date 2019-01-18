@@ -2,29 +2,7 @@ import { AbstractState } from './AbstractState.js';
 import { SPECS } from './battlecode';
 import { LoopState } from './LoopState.js';
 import { StationaryState } from './StationaryState.js';
-import SPEEDS from './speeds.js';
-import helper from './helper.js';
 import nav from 'nav.js';
-
-const DEBUG = true;
-
-class InitialState {
-  constructor(pilgrim) {
-    this.pilgrim = pilgrim;
-  }
-
-  check_state() {
-    var new_state;
-    if (this.pilgrim.getKarboniteMap()[this.pilgrim.me.y][this.pilgrim.me.x] ||
-        this.pilgrim.getFuelMap()[this.pilgrim.me.y][this.pilgrim.me.x]) {
-          new_state = new StationaryState(this.pilgrim);
-    } else {
-      new_state = new LoopState(this.pilgrim);
-    }
-    new_state.check_state();
-    return new_state;
-  }
-}
 
 
 /**
@@ -52,6 +30,24 @@ export class PilgrimState extends AbstractState {
 
   act() {
     return this.current_state.act();
+  }
+}
+
+class InitialState {
+  constructor(pilgrim) {
+    this.pilgrim = pilgrim;
+  }
+
+  check_state() {
+    var new_state;
+    if (this.pilgrim.getKarboniteMap()[this.pilgrim.me.y][this.pilgrim.me.x] ||
+        this.pilgrim.getFuelMap()[this.pilgrim.me.y][this.pilgrim.me.x]) {
+          new_state = new StationaryState(this.pilgrim);
+    } else {
+      new_state = new LoopState(this.pilgrim);
+    }
+    new_state.check_state();
+    return new_state;
   }
 }
 
