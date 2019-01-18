@@ -4,8 +4,10 @@ if not exist "c:/Users/absna/AppData/Roaming/npm/node_modules/bc19/bots/my_bot/"
   mkdir "c:/Users/absna/AppData/Roaming/npm/node_modules/bc19/bots/my_bot/"
 )
 
+
 rem copy all relevant files from current directory to game directory.
-xcopy . "c:/Users/absna/AppData/Roaming/npm/node_modules/bc19/bots/my_bot" /Y
+xcopy . "c:/Users/absna/AppData/Roaming/npm/node_modules/bc19/bots/my_bot" /Y /S
+
 
 cd "c:/Users/absna/AppData/Roaming/npm/node_modules/bc19/bots"
 rem Run instance of game with copied bots.

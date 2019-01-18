@@ -1,12 +1,31 @@
 import { AbstractState } from './AbstractState.js';
 import { SPECS } from './battlecode';
-import { LoopState } from './pilgrim_state/LoopState.js';
-import { StationaryState } from './pilgrim_state/StationaryState.js';
+import { LoopState } from './LoopState.js';
+import { StationaryState } from './StationaryState.js';
 import SPEEDS from './speeds.js';
 import helper from './helper.js';
 import nav from 'nav.js';
 
 const DEBUG = true;
+
+class InitialState {
+  constructor(pilgrim) {
+    this.pilgrim = pilgrim;
+  }
+
+  check_state() {
+    var new_state;
+    if (this.pilgrim.getKarboniteMap()[this.pilgrim.me.y][this.pilgrim.me.x] ||
+        this.pilgrim.getFuelMap()[this.pilgrim.me.y][this.pilgrim.me.x]) {
+          new_state = new StationaryState(this.pilgrim);
+    } else {
+      new_state = new LoopState(this.pilgrim);
+    }
+    new_state.check_state();
+    return new_state;
+  }
+}
+
 
 /**
  * State machine to control pilgrim units.
@@ -20,7 +39,7 @@ const DEBUG = true;
 export class PilgrimState extends AbstractState {
   constructor(pilgrim) {
     super();
-    this.current_state = this.initial_state;
+    this.current_state = new InitialState(pilgrim);
     this.pilgrim = pilgrim;
     this.castle_pos = this._detect_castle();
     this.resource_location = nav.getClosestKarbonite({x: pilgrim.me.x, y: pilgrim.me.y}, pilgrim.getKarboniteMap());
@@ -30,28 +49,12 @@ export class PilgrimState extends AbstractState {
     this.actions = this._make_actions();
   }
 
-  initial_state() {
-    if (this.pilgrim.getKarboniteMap()[this.pilgrim.me.y][this.pilgrim.me.x] ||
-        this.pilgrim.getFuelMap()[this.pilgrim.me.y][this.pilgrim.me.x]) {
-          return new StationaryState(this.pilgrim);
-    }
-    return new LoopState(this.pilgrim);
-  }
-
   check_state() {
     this.current_state = this.current_state.check_state();
   }
 
   act() {
-    if (DEBUG) {
-      this._log_state();
-    }
-    let action = this.actions.get(this.current_state);
-    if (action === undefined) {
-      this.pilgrim.log("Undefined action! Current state: " + this.current_state.toString());
-      return;
-    }
-    return action.bind(this)();
+    return this.current_state.act();
   }
 
 
@@ -162,22 +165,6 @@ export class PilgrimState extends AbstractState {
     return Error('Error: No Castles were visible when trying to deduce a drop-off point.');
   }
 
-  _log_state() {
-    let str = '';
-    if (this.current_state === this.gather_state) {
-      str = "Pilgrim " + this.pilgrim.id.toString() + " is gathering resources.";
-    } else if (this.current_state === this.deposit_state) {
-      str = "Pilgrim " + this.pilgrim.id.toString() + " is depositing resources.";
-    } else if (this.current_state === this.travel_to_castle_state) {
-      str = "Pilgrim is traveling to castle";
-    } else if (this.current_state === this.travel_to_resource_state) {
-      str = "Pilgrim is traveling to resource";
-    } else {
-      str = "Unknown state";
-    }
-    this.pilgrim.log(str);
-  }
-
   _make_actions() {
     let actions = new Map();
     actions.set(this.gather_state, this.gather_action);
@@ -208,4 +195,5 @@ export class PilgrimState extends AbstractState {
     return helper.new_path(this.pilgrim.map, start, end);
   }
 }
+
 

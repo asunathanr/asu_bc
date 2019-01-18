@@ -1,7 +1,7 @@
-import helper from '../helper.js';
-import { SPECS } from '.../battlecode';
-import SPEEDS from '../speeds.js';
-import nav from '../nav.js';
+import helper from './helper.js';
+import { SPECS } from './battlecode';
+import SPEEDS from './speeds.js';
+import nav from './nav.js';
 
 /**
  * Performs behavior for a pilgrim with movement.
@@ -9,14 +9,12 @@ import nav from '../nav.js';
 export class LoopState {
   constructor(pilgrim) {
     this.pilgrim = pilgrim;
-  }
-
-  initial_state() {
     this.state = new LoopToDest(this.pilgrim);
   }
 
   check_state() {
     this.state = this.state.check_state();
+    return this;
   } 
 
   act() {

@@ -1,5 +1,6 @@
-import { Path } from '../path.js';
-import helper from '../helper.js';
+import { Path } from './path.js';
+import helper from './helper.js';
+import { SPECS } from 'battlecode';
 
 /**
  * Performs behavior for a pilgrim without movement.
@@ -7,14 +8,13 @@ import helper from '../helper.js';
 export class StationaryState {
   constructor(pilgrim) {
     this.pilgrim = pilgrim;
-  }
-
-  initial_state() {
+    this.pilgrim.log("Pilgrim " + pilgrim.me.id.toString() + " is in stationary state");
     this.state = new StationaryGather(this.pilgrim);
   }
 
   check_state() {
     this.state = this.state.check_state();
+    return this;
   } 
 
   act() {
@@ -29,6 +29,7 @@ export class StationaryState {
 class StationaryDeposit {
   constructor(pilgrim) {
     this.pilgrim = pilgrim;
+    this.castle_pos = this._detect_castle();
   }
 
   check_state() {
@@ -49,6 +50,17 @@ class StationaryDeposit {
       return;
     }
   }
+
+  _detect_castle() {
+    for (let robot of this.pilgrim.getVisibleRobots()) {
+      if (robot.unit === SPECS.CASTLE) {
+        this.pilgrim.log("Castle is at " + robot.x.toString() + ',' + robot.y.toString());
+        return [robot.x, robot.y];
+      }
+    }
+    return Error('Error: No Castles were visible when trying to deduce a drop-off point.');
+  }
+
 }
 
 
