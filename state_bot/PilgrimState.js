@@ -21,7 +21,6 @@ export class PilgrimState extends AbstractState {
     this.pilgrim = pilgrim;
     this.destination = nav.getClosestKarbonite({x: pilgrim.me.x, y: pilgrim.me.y}, pilgrim.getKarboniteMap());
     this.origin = {x: this.pilgrim.me.x, y: this.pilgrim.me.y};
-    this.pilgrim.make_path(this.pilgrim.my_pos(), [this.destination.x, this.destination.y]);
     this.actions = this._make_actions();
   }
 
@@ -30,6 +29,7 @@ export class PilgrimState extends AbstractState {
         this.pilgrim.getFuelMap()[this.pilgrim.me.y][this.pilgrim.me.x]) {
       return this.gather_state;
     } else {
+      this.pilgrim.make_path(this.pilgrim.my_pos(), this.destination);
       return this.travel_to_resource_state;
     }
   }
@@ -70,7 +70,7 @@ export class PilgrimState extends AbstractState {
   gather_state() {
     if (this.pilgrim.me.karbonite === SPECS.UNITS[this.pilgrim.me.unit].KARBONITE_CAPACITY
        || this.pilgrim.me.fuel === SPECS.UNITS[this.pilgrim.me.unit].FUEL_CAPACITY) {
-      let castle = this._detect_castle();
+      let castle = this._choose_dump_point();
       this.pilgrim.make_path(this.pilgrim.my_pos(), [castle.x, castle.y]);
       return this.travel_to_castle_state;
     } else {
@@ -161,6 +161,19 @@ export class PilgrimState extends AbstractState {
     actions.set(this.travel_to_resource_state, this.travel_to_resource_action);
     actions.set(this.build_state, this.build_action);
     return actions;
+  }
+
+  _choose_dump_point() {
+    var castle = this._detect_castle();
+    var adjPoints = [[0, 1], [0, -1], [1, 0], [-1, 0], [-1, 1], [1, -1], [-1, -1], [1, 1]].map((cell) => {
+      return [castle.x + cell[0], castle.y + cell[1]];
+    });
+    var self = this;
+    //let emptyAdjPoints = adjPoints.filter((cell) => {
+      //return self.pilgrim.map[cell[1]][cell[0]];
+    //});
+    
+    return adjPoints[Math.floor(Math.random() * adjPoints.length)];
   }
 }
 

@@ -61,6 +61,10 @@ class Path {
     }
   }
 
+  truncate(by) {
+    this.cells.pop();
+  }
+
   reverse() {
     let reversedPath = this.cells.reverse();
     this.cells = reversedPath.map((cell) => {

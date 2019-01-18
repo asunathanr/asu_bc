@@ -78,7 +78,8 @@ class MyRobot extends BCAbstractRobot {
 
   move_unit() {
     if (!path.valid()) {
-      this.log("Crusader: " + this.me.id.toString() + " is trying to move on invalid path.");
+      this.log("Unit: " + this.me.id.toString() + " is trying to move on invalid path.");
+      this.log("Is path empty?: " + path.empty().toString());
       return;
     }
     var choice = path.next();
@@ -92,6 +93,10 @@ class MyRobot extends BCAbstractRobot {
       return;
     }
     
+  }
+
+  trucate_path(by) {
+    path.truncate();
   }
 
   my_pos() {
@@ -119,7 +124,10 @@ class MyRobot extends BCAbstractRobot {
   }
 
   make_path(start, goal) {
-    path.make(this.getPassableMap(), start, goal, SPECS.UNITS[this.me.unit].SPEED);
+    path.make(this.map, start, goal, SPECS.UNITS[this.me.unit].SPEED);
+    if (!path.valid()) {
+      Error('Failed to make path');
+    }
   }
 
   /**
