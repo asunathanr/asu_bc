@@ -14,7 +14,9 @@ class Path {
   }
 
   valid() {
-    return !this.empty() && this.pos < this.cells.length;
+    return this.cells !== undefined ||
+     this.pos !== undefined ||
+    (!this.empty() && this.pos < this.cells.length);
   }
 
   empty() {
@@ -23,6 +25,13 @@ class Path {
 
   at_path_end() {
     return this.pos >= this.cells.length || this.empty();
+  }
+
+  /**
+   * Reset path to starting cell.
+   */
+  reset() {
+    this.pos = 0;
   }
 
   /**
@@ -68,6 +77,9 @@ class Path {
   make(grid, start, goal, speed) {
     this.pos = 0;
     this.cells = a_star(grid, start, goal, speed);
+    if (this.cells === undefined) {
+      Error('Newly created path is invalid.');
+    }
   }
 
   /**

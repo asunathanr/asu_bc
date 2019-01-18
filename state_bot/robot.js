@@ -95,10 +95,6 @@ class MyRobot extends BCAbstractRobot {
     
   }
 
-  trucate_path(by) {
-    path.truncate();
-  }
-
   my_pos() {
     return [this.me.x, this.me.y];
   }
