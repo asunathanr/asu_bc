@@ -84,9 +84,11 @@ class MyRobot extends BCAbstractRobot {
     var choice = path.next();
     if (choice === END_OF_PATH) {
       return;
-    } else if (this.getVisibleRobotMap()[this.me.y + choice[1]][this.me.x + choice[0]]===0){
+    } 
+    else if (this.getVisibleRobotMap()[this.me.y + choice[1]][this.me.x + choice[0]]===0) {
       return this.move(choice[0], choice[1]);
-    } else {
+    } 
+    else {
       //this.log("something in my path, waiting " + (this.me.x + choice[0]) + "," + (this.me.y + choice[1]));
       path.prev();
       return;
