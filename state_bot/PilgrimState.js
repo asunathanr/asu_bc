@@ -83,7 +83,7 @@ export class PilgrimState extends AbstractState {
       return this.deposit_state;
     }
     this.pilgrim.make_path(this.pilgrim.my_pos(), [this.origin.x, this.origin.y]);
-    return this.travel_to_castle_state;
+    return this.travel_to_resource_state;
   }
 
   build_state() {
@@ -113,7 +113,9 @@ export class PilgrimState extends AbstractState {
     if (this.pilgrim.at_goal()) {
       return; 
     }
-    return this.pilgrim.move_unit();
+    let next = this.pilgrim.move_unit();
+    this.pilgrim.log("Pilgrim's next cell in path: " + next.toString());
+    return next;
   }
 
   travel_to_resource_action() {

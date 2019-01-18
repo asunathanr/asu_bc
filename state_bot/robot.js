@@ -79,7 +79,7 @@ class MyRobot extends BCAbstractRobot {
   move_unit() {
     if (!path.valid()) {
       this.log("Unit: " + this.me.id.toString() + " is trying to move on invalid path.");
-      this.log("Is path empty?: " + path.empty().toString());
+      this.log("Path is: " + path.serialize());
       return;
     }
     var choice = path.next();
@@ -113,10 +113,6 @@ class MyRobot extends BCAbstractRobot {
       }
     }
     return coords;
-  }
-
-  reverse_path() {
-    path.reverse();
   }
 
   at_goal() {
