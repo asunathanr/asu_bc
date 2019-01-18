@@ -9,7 +9,7 @@ const END_OF_PATH = -1;
  */
 class Path {
   constructor(cells = [], pos = 0) {
-    this.cells = cells
+    this.cells = cells;
     this.pos = pos;
   }
 

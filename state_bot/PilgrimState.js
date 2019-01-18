@@ -26,7 +26,8 @@ export class PilgrimState extends AbstractState {
   }
 
   initial_state() {
-    if (this.destination.x === this.pilgrim.my_pos()[0] && this.destination.y === this.pilgrim.my_pos()[1]) {
+    if (this.pilgrim.getKarboniteMap()[this.pilgrim.me.y][this.pilgrim.me.x] ||
+        this.pilgrim.getFuelMap()[this.pilgrim.me.y][this.pilgrim.me.x]) {
       return this.gather_state;
     } else {
       return this.travel_to_resource_state;
@@ -67,8 +68,10 @@ export class PilgrimState extends AbstractState {
   }
 
   gather_state() {
-    if (this.pilgrim.me.karbonite === SPECS.UNITS[this.pilgrim.me.unit].KARBONITE_CAPACITY) {
-      this.pilgrim.make_path(this.pilgrim.my_pos(), [this.origin.x, this.origin.y]);
+    if (this.pilgrim.me.karbonite === SPECS.UNITS[this.pilgrim.me.unit].KARBONITE_CAPACITY
+       || this.pilgrim.me.fuel === SPECS.UNITS[this.pilgrim.me.unit].FUEL_CAPACITY) {
+      let castle = this._detect_castle();
+      this.pilgrim.make_path(this.pilgrim.my_pos(), [castle.x, castle.y]);
       return this.travel_to_castle_state;
     } else {
       return this.gather_state;
@@ -76,11 +79,11 @@ export class PilgrimState extends AbstractState {
   }
 
   deposit_state() {
-    if (this.pilgrim.me.karbonite > 0) {
+    if (this.pilgrim.me.karbonite > 0 || this.pilgrim.me.fuel > 25) {
       return this.deposit_state;
     }
     this.pilgrim.make_path(this.pilgrim.my_pos(), [this.origin.x, this.origin.y]);
-    return this.travel_to_resource_state;
+    return this.travel_to_castle_state;
   }
 
   build_state() {
