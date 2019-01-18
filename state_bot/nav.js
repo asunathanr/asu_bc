@@ -159,7 +159,32 @@ nav.isHorizontalReflection = (grid) => {
         }
     }
     //todo: implement handling for perfectly symmetric map
-    return Error('failed to compute map symmetry');
+    throw Error('failed to compute map symmetry');
+}
+
+/**
+ * helper function to get lower and upper bounds of a map half
+ * @param: cell {x,y}
+ * @param: grid the passable map grid of MyRobot object
+ * @returns: {xlo,xhi,ylo,yhi} object where each attribute is a number defining a bound.
+ */
+nav.getHalfBounds = (cell,grid) => {
+    if(nav.isHorizontalReflection(grid)){
+        if(cell.y < grid.length/2){
+            return {xlo:0, xhi:grid.length, ylo:0, yhi:grid.length/2};
+        }
+        else {
+            return {xlo:0, xhi:grid.length, ylo:grid.length/2, yhi:grid.length};
+        }
+    }
+    else {
+        if(cell.x < grid.length/2){
+            return {xlo:0, xhi:grid.length/2, ylo:0, yhi:grid.length};
+        }
+        else {
+            return {xlo:grid.length/2, xhi:grid.length, ylo:0, yhi:grid.length};
+        }
+    }
 }
 
 nav.getRandHalfGrid = (crusader) => {

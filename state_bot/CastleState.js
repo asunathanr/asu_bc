@@ -1,5 +1,6 @@
 import { AbstractState } from './AbstractState.js';
 import { SPECS } from 'battlecode';
+import nav from './nav.js';
 
 const CRUSADER_TYPE = SPECS.CRUSADER;
 const PILGRIM_TYPE = SPECS.PILGRIM;
@@ -11,6 +12,7 @@ const PILGRIM_TYPE = SPECS.PILGRIM;
  * @property castle: stores the MyRobot object which contains this class.
  * @property build_locations: a list of potential build locations (passable).
  * @property attackable: robots in attack range of the castle.
+ * @property my_half: {xlo,xhi,ylo,yhi} object containg bounds describing this units half of the map.
  */
 export class CastleState extends AbstractState {
 
@@ -25,6 +27,7 @@ export class CastleState extends AbstractState {
         this.empty_resource_cells = [];
         this.prev_unit = null;
         this.attackable = [];
+        this.my_half = {xlo:0, xhi:this.castle.map.length, ylo:0, yhi:this.castle.map.length};
     }
 
     /**
@@ -46,6 +49,9 @@ export class CastleState extends AbstractState {
         this.empty_resource_cells = this.build_locations.filter((cell) => {
             return this.castle.getKarboniteMap()[cell[1]][cell[0]] || this.castle.getFuelMap()[cell[1]][cell[0]];
         });
+
+        //calculate my_half bounds
+        this.my_half = nav.getHalfBounds({x:this.castle.me.x,y:this.castle.me.y},this.castle.map);
 
         //check if able to build crusader
         if (SPECS.UNITS[CRUSADER_TYPE].CONSTRUCTION_FUEL > this.castle.fuel &&
