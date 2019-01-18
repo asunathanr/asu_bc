@@ -1,5 +1,6 @@
 import helper from './helper.js';
 import { SPECS } from './battlecode';
+import { manhattan } from './pathfinder.js';
 import SPEEDS from './speeds.js';
 import nav from './nav.js';
 
@@ -9,13 +10,14 @@ import nav from './nav.js';
 export class LoopState {
   constructor(pilgrim) {
     this.pilgrim = pilgrim;
+    this.pilgrim.log("Pilgrim " + pilgrim.me.id.toString() + " is in loop state");
     this.state = new LoopToDest(this.pilgrim);
   }
 
   check_state() {
     this.state = this.state.check_state();
     return this;
-  } 
+  }
 
   act() {
     return this.state.act();
@@ -26,6 +28,7 @@ export class LoopState {
 class LoopDeposit {
   constructor(pilgrim) {
     this.pilgrim = pilgrim;
+    this.castle_pos = this._detect_castle();
   }
 
   check_state() {
@@ -45,6 +48,16 @@ class LoopDeposit {
     else {
       return;
     }
+  }
+
+  _detect_castle() {
+    for (let robot of this.pilgrim.getVisibleRobots()) {
+      if (robot.unit === SPECS.CASTLE) {
+        this.pilgrim.log("Castle is at " + robot.x.toString() + ',' + robot.y.toString());
+        return [robot.x, robot.y];
+      }
+    }
+    return Error('Error: No Castles were visible when trying to deduce a drop-off point.');
   }
 }
 
@@ -71,7 +84,7 @@ class LoopGather {
 class LoopToDest {
   constructor(pilgrim) {
     this.pilgrim = pilgrim;
-    this.resource_location = nav.getClosestKarbonite({x: pilgrim.me.x, y: pilgrim.me.y}, pilgrim.getKarboniteMap());
+    this.resource_location = this._pick_nearest_resource();
     this.path = helper.new_path(
       this.pilgrim.map,
       this.pilgrim.my_pos(),
@@ -94,13 +107,21 @@ class LoopToDest {
     let next = this.path.next();
     return this.pilgrim.move(next[0], next[1]);
   }
+  
+  _pick_nearest_resource() {
+    let nearest_karb = nav.getClosestKarbonite({x: pilgrim.me.x, y: pilgrim.me.y}, pilgrim.getKarboniteMap());
+    let nearest_fuel = nav.getClosestKarbonite({x: pilgrim.me.x, y: pilgrim.me.y}, pilgrim.getFuelMap());
+    let karb_dist = manhattan(this.pilgrim.my_pos(), [this.nearest_karb.x, this.nearest_karb.y]);
+    let fuel_dist = manhattan(this.pilgrim.my_pos(), [this.nearest_fuel.x, this.nearest_fuel.y]);
+    return nearest_karb ? Math.min(karb_dist, fuel_dist) : nearest_fuel;
+  }
 }
 
 class LoopToCastle {
   constructor(pilgrim) {
     this.pilgrim = pilgrim;
     let castle = this._choose_dump_point();
-    this.deposit_path = helper.new_path(this.pilgrim.map, this.pilgrim.my_pos(), [castle.x, castle.y], SPEEDS.PILGRIM);
+    this.deposit_path = helper.new_path(this.pilgrim.map, this.pilgrim.my_pos(), castle, SPEEDS.PILGRIM);
   }
 
   check_state() {
@@ -111,7 +132,7 @@ class LoopToCastle {
   } 
 
   act() {
-    if (this.deposit_path.empty() || this.deposit_path.at_path_end()) {
+    if (this.deposit_path.at_path_end()) {
       return; 
     }
     let next = this.deposit_path.next();
