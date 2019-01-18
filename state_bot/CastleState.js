@@ -24,6 +24,7 @@ export class CastleState extends AbstractState {
         this.current_state = this.initial_state; //all robots start at an initial state
         this.castle = castle;
         this.build_locations = [];
+        this.empty_resource_cells = [];
         this.prev_unit = null;
         this.attackable = [];
         this.my_half = {xlo:0, xhi:this.castle.map.length, ylo:0, yhi:this.castle.map.length};
@@ -43,6 +44,10 @@ export class CastleState extends AbstractState {
         });
         this.build_locations = adjCells.filter(function(cell) { 
             return castle.getPassableMap()[cell[1], cell[0]];
+        });
+        
+        this.empty_resource_cells = this.build_locations.filter((cell) => {
+            return this.castle.getKarboniteMap()[cell[1]][cell[0]] || this.castle.getFuelMap()[cell[1]][cell[0]];
         });
 
         //calculate my_half bounds
@@ -117,10 +122,9 @@ export class CastleState extends AbstractState {
             return Error("should not act on initial_state");
         }
         else if (this.current_state === this.build_state) {
-            var chosenPosIndex = Math.floor(Math.random() * this.build_locations.length);
-            var chosenPos = this.build_locations[chosenPosIndex];
-            var chosenDxy = [this.castle.me.x - chosenPos[0], this.castle.me.y - chosenPos[1]];
+            let chosenDxy = this.pick_spawn_location();
             let build_type = this.pick_unit();
+            this.prev_unit = build_type;
             return this.castle.buildUnit(build_type, chosenDxy[1], chosenDxy[0]);
         }
         else if (this.current_state === this.idle_state) {
@@ -148,7 +152,19 @@ export class CastleState extends AbstractState {
         else {
             unit = PILGRIM_TYPE;
         }
-        this.prev_unit = unit;
         return unit;
+    }
+
+    // Decide spawn location for pilgrim
+    pick_spawn_location() {
+        var chosenPosIndex = Math.floor(Math.random() * this.build_locations.length);
+        var chosenPos = this.build_locations[chosenPosIndex];
+        var chosenDxy = [this.castle.me.x - chosenPos[0], this.castle.me.y - chosenPos[1]];
+        let build_type = this.pick_unit();
+        if (build_type === PILGRIM_TYPE) {
+            chosenPos = this.empty_resource_cells.pop();
+            chosenDxy = [this.castle.me.x - chosenPos[0], this.castle.me.y - chosenPos[1]];
+        }
+        return chosenDxy;
     }
 }

@@ -26,7 +26,8 @@ export class PilgrimState extends AbstractState {
   }
 
   initial_state() {
-    if (this.destination.x === this.pilgrim.my_pos()[0] && this.destination.y === this.pilgrim.my_pos()[1]) {
+    if (this.pilgrim.getKarboniteMap()[this.pilgrim.me.y][this.pilgrim.me.x] ||
+        this.pilgrim.getFuelMap()[this.pilgrim.me.y][this.pilgrim.me.x]) {
       return this.gather_state;
     } else {
       return this.travel_to_resource_state;
@@ -41,7 +42,12 @@ export class PilgrimState extends AbstractState {
     if (DEBUG) {
       this._log_state();
     }
-    return this.actions.get(this.current_state).bind(this)();
+    let action = this.actions.get(this.current_state);
+    if (action === undefined) {
+      this.pilgrim.log("Undefined action! Current state: " + this.current_state.toString());
+      return;
+    }
+    return action.bind(this)();
   }
 
 
@@ -62,7 +68,10 @@ export class PilgrimState extends AbstractState {
   }
 
   gather_state() {
-    if (this.destination.x !== this.pilgrim.my_pos()[0] && this.destination.y !== this.pilgrim.my_pos()[1]) {
+    if (this.pilgrim.me.karbonite === SPECS.UNITS[this.pilgrim.me.unit].KARBONITE_CAPACITY
+       || this.pilgrim.me.fuel === SPECS.UNITS[this.pilgrim.me.unit].FUEL_CAPACITY) {
+      let castle = this._detect_castle();
+      this.pilgrim.make_path(this.pilgrim.my_pos(), [castle.x, castle.y]);
       return this.travel_to_castle_state;
     } else {
       return this.gather_state;
@@ -70,7 +79,11 @@ export class PilgrimState extends AbstractState {
   }
 
   deposit_state() {
-    return this.travel_to_resource_state;
+    if (this.pilgrim.me.karbonite > 0 || this.pilgrim.me.fuel > 25) {
+      return this.deposit_state;
+    }
+    this.pilgrim.make_path(this.pilgrim.my_pos(), [this.origin.x, this.origin.y]);
+    return this.travel_to_castle_state;
   }
 
   build_state() {
@@ -80,13 +93,24 @@ export class PilgrimState extends AbstractState {
 
   // ACTIONS
 
+  deposit_action() {
+    if (this.pilgrim.me.karbonite > 0) {
+      let castle_pos = this._detect_castle();
+      let castle_dxy = {x: castle_pos[0] - this.pilgrim.me.x, y: castle_pos[1] - this.pilgrim.me.y};
+      return this.pilgrim.give(castle_dxy.x, castle_dxy.y, this.pilgrim.karbonite, 0);
+    } 
+    else {
+      return;
+    }
+    
+  }
+
   gather_action() {
-    this.pilgrim.make_path(this.pilgrim.my_pos(), [this.origin.x, this.origin.y]);
     return this.pilgrim.mine();
   }
 
   travel_to_castle_action() {
-    if (self.pilgrim.at_goal()) {
+    if (this.pilgrim.at_goal()) {
       return; 
     }
     return this.pilgrim.move_unit();
