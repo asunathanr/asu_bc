@@ -43,19 +43,7 @@ export class CrusaderState extends AbstractState{
      */
     move_state () {
         // get attackable robots
-	    var self = this.crusader;
-	    this.attackable = self.getVisibleRobots().filter((r) => {
-            if (! self.isVisible(r)){
-                return false;
-            }
-            const dist = (r.x-self.me.x)**2 + (r.y-self.me.y)**2;
-            if (r.team !== self.me.team
-            && SPECS.UNITS[SPECS.CRUSADER].ATTACK_RADIUS[0] <= dist
-            && dist <= SPECS.UNITS[SPECS.CRUSADER].ATTACK_RADIUS[1]) {
-                return true;
-            }
-            return false;
-        });
+	    this.attackable = this.attackable = this.crusader.getAttackableRobots();
         //if attackable units, go to attack_state
         if(this.attackable.length > 0){
             return this.attack_state;
@@ -79,19 +67,7 @@ export class CrusaderState extends AbstractState{
      */
     attack_state () {
         // get attackable robots
-	    var self = this.crusader;
-	    this.attackable = self.getVisibleRobots().filter((r) => {
-            if (! self.isVisible(r)){
-                return false;
-            }
-            const dist = (r.x-self.me.x)**2 + (r.y-self.me.y)**2;
-            if (r.team !== self.me.team
-            && SPECS.UNITS[SPECS.CRUSADER].ATTACK_RADIUS[0] <= dist
-            && dist <= SPECS.UNITS[SPECS.CRUSADER].ATTACK_RADIUS[1]) {
-                return true;
-            }
-            return false;
-        });
+	    this.attackable = this.crusader.getAttackableRobots();
 
         //continue to remain in attack_state if there are remaining enemies to attack
         if(this.attackable.length >0){
