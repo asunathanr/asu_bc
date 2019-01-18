@@ -14,8 +14,8 @@ class Path {
   }
 
   valid() {
-    return this.cells !== undefined ||
-     this.pos !== undefined ||
+    return this.cells !== undefined &&
+     this.pos !== undefined &&
     (!this.empty() && this.pos < this.cells.length);
   }
 
@@ -45,7 +45,7 @@ class Path {
     } else if (this.pos >= this.cells.length) {
       cell = END_OF_PATH;
     } else {
-      cell = Error('No new path');
+      cell = Error('Path is invalid');
     }
     return cell;
   }
@@ -87,7 +87,7 @@ class Path {
    */
   serialize() {
     serializedPath = '';
-    if (!(cells instanceof Array)) {
+    if (!(this.cells instanceof Array)) {
       return "Path is not an array, typeof Path is ".concat(typeof(this.cells));
     }
     for (let cell of this.cells) {

@@ -155,13 +155,13 @@ export class CastleState extends AbstractState {
         return unit;
     }
 
-    // Decide spawn location for pilgrim
+    // Decide spawn location for units
     pick_spawn_location() {
         var chosenPosIndex = Math.floor(Math.random() * this.build_locations.length);
         var chosenPos = this.build_locations[chosenPosIndex];
         var chosenDxy = [this.castle.me.x - chosenPos[0], this.castle.me.y - chosenPos[1]];
         let build_type = this.pick_unit();
-        if (build_type === PILGRIM_TYPE) {
+        if (build_type === PILGRIM_TYPE && this.empty_resource_cells.length > 0) {
             chosenPos = this.empty_resource_cells.pop();
             chosenDxy = [this.castle.me.x - chosenPos[0], this.castle.me.y - chosenPos[1]];
         }

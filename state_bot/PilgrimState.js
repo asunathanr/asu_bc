@@ -1,5 +1,8 @@
 import { AbstractState } from './AbstractState.js';
 import { SPECS } from './battlecode';
+import { LoopState } from './pilgrim_state/LoopState.js';
+import { StationaryState } from './pilgrim_state/StationaryState.js';
+import SPEEDS from './speeds.js';
 import helper from './helper.js';
 import nav from 'nav.js';
 
@@ -10,7 +13,7 @@ const DEBUG = true;
  * @property actions: A map of pilgrim states to pilgrim actions.
  * @property current_state: Which state to act upon next.
  * @property {MyRobot} pilgrim: The pilgrim to API interface class.
- * @property castle_dxy: Where to deposit resources.
+ * @property castle_pos: Where to deposit resources.
  * @property destination: Resource location.
  * @property path: The set path between resource cell and delivery position.
  */
@@ -19,21 +22,24 @@ export class PilgrimState extends AbstractState {
     super();
     this.current_state = this.initial_state;
     this.pilgrim = pilgrim;
+    this.castle_pos = this._detect_castle();
     this.resource_location = nav.getClosestKarbonite({x: pilgrim.me.x, y: pilgrim.me.y}, pilgrim.getKarboniteMap());
     this.deposit_path = null;
-    this.start_path = null;
     this.gather_path = null;
     this.origin = {x: this.pilgrim.me.x, y: this.pilgrim.me.y};
     this.actions = this._make_actions();
   }
 
   initial_state() {
-    this.gather_path = helper.new_path(this.pilgrim.map, this.pilgrim.my_pos(), [this.resource_location.x, this.resource_location.y]);
-    return this.travel_to_resource_state;
+    if (this.pilgrim.getKarboniteMap()[this.pilgrim.me.y][this.pilgrim.me.x] ||
+        this.pilgrim.getFuelMap()[this.pilgrim.me.y][this.pilgrim.me.x]) {
+          return new StationaryState(this.pilgrim);
+    }
+    return new LoopState(this.pilgrim);
   }
 
   check_state() {
-    this.current_state = this.current_state();
+    this.current_state = this.current_state.check_state();
   }
 
   act() {
@@ -52,25 +58,36 @@ export class PilgrimState extends AbstractState {
   // STATES
 
   travel_to_resource_state() {
-    if (this.pilgrim.at_goal()) {
+    if (this.gather_path === null) {
+      this.gather_path = helper.new_path(
+        this.pilgrim.map,
+        this.pilgrim.my_pos(),
+        [this.resource_location.x,
+        this.resource_location.y], 
+        SPEEDS.PILGRIM
+      );
+    }
+    if (this.gather_path.at_path_end()) {
+      this.gather_path.reset();
       return this.gather_state;
     }
     return this.travel_to_resource_state;
   }
 
   travel_to_castle_state() {
-    if (this.pilgrim.at_goal()) {
-      return this.deposit_state;
-    } else if (this.deposit_path === null) {
+    if (this.deposit_path === null) {
       let castle = this._choose_dump_point();
-      this.pilgrim.make_path(this.pilgrim.my_pos(), [castle.x, castle.y]);
+      this.deposit_path = helper.new_path(this.pilgrim.map, this.pilgrim.my_pos(), [castle.x, castle.y], SPEEDS.PILGRIM);
+    } 
+    if (this.deposit_path.at_path_end()) {
+      return this.deposit_state;
     }
     return this.travel_to_castle_state;
   }
 
   gather_state() {
-    if (this.pilgrim.me.karbonite === SPECS.UNITS[this.pilgrim.me.unit].KARBONITE_CAPACITY
-       || this.pilgrim.me.fuel === SPECS.UNITS[this.pilgrim.me.unit].FUEL_CAPACITY) {
+    if (this.pilgrim.me.karbonite >= SPECS.UNITS[SPECS.PILGRIM].KARBONITE_CAPACITY
+       || this.pilgrim.me.fuel >= SPECS.UNITS[SPECS.PILGRIM].FUEL_CAPACITY) {
       return this.travel_to_castle_state;
     } else {
       return this.gather_state;
@@ -92,11 +109,12 @@ export class PilgrimState extends AbstractState {
   // ACTIONS
 
   deposit_action() {
+    let castle_dxy = {x: this.castle_pos[0] - this.pilgrim.me.x, y: this.castle_pos[1] - this.pilgrim.me.y};
     if (this.pilgrim.me.karbonite > 0) {
-      let castle_pos = this._detect_castle();
-      let castle_dxy = {x: castle_pos[0] - this.pilgrim.me.x, y: castle_pos[1] - this.pilgrim.me.y};
-      return this.pilgrim.give(castle_dxy.x, castle_dxy.y, this.pilgrim.karbonite, 0);
-    } 
+      return this.pilgrim.give(castle_dxy.x, castle_dxy.y, this.pilgrim.me.karbonite, 0);
+    } else if (this.pilgrim.me.fuel > 0) {
+      return this.pilgrim.give(castle_dxy.x, castle_dxy.y, 0, this.pilgrim.me.fuel);
+    }
     else {
       return;
     }
@@ -108,19 +126,26 @@ export class PilgrimState extends AbstractState {
   }
 
   travel_to_castle_action() {
-    if (this.pilgrim.at_goal()) {
+    if (this.deposit_path === null) {
+      let castle = this._choose_dump_point();
+      this.deposit_path = helper.new_path(this.pilgrim.map, this.pilgrim.my_pos(), castle, SPEEDS.PILGRIM);
+    } 
+    if (this.deposit_path.empty() || this.deposit_path.at_path_end()) {
       return; 
     }
     let next = this.deposit_path.next();
-    this.pilgrim.log("Pilgrim's next cell in path: " + next.toString());
-    return next;
+    this.pilgrim.log("Next cell for pilgrim: " + next.toString());
+    return this.pilgrim.move(next[0], next[1]);
   }
 
   travel_to_resource_action() {
-    if (this.pilgrim.at_goal()) {
+    
+    if (this.gather_path.at_path_end()) {
       return;
-    }
-    return this.pilgrim.move_unit();
+    } 
+    this.pilgrim.log('Is path valid? ' + this.gather_path.valid().toString());
+    let next = this.gather_path.next();
+    return this.pilgrim.move(next[0], next[1]);
   }
 
   build_action() {
@@ -129,7 +154,7 @@ export class PilgrimState extends AbstractState {
 
   _detect_castle() {
     for (let robot of this.pilgrim.getVisibleRobots()) {
-      if (robot.unit === SPECS['CASTLE']) {
+      if (robot.unit === SPECS.CASTLE) {
         this.pilgrim.log("Castle is at " + robot.x.toString() + ',' + robot.y.toString());
         return [robot.x, robot.y];
       }
@@ -165,15 +190,18 @@ export class PilgrimState extends AbstractState {
 
   _choose_dump_point() {
     var castle = this._detect_castle();
-    var adjPoints = [[0, 1], [0, -1], [1, 0], [-1, 0], [-1, 1], [1, -1], [-1, -1], [1, 1]].map((cell) => {
-      return [castle.x + cell[0], castle.y + cell[1]];
-    });
-    var self = this;
-    //let emptyAdjPoints = adjPoints.filter((cell) => {
-      //return self.pilgrim.map[cell[1]][cell[0]];
-    //});
-    
-    return adjPoints[Math.floor(Math.random() * adjPoints.length)];
+    let adjPoints = [];
+    for (let d of [[0, 1], [0, -1], [1, 0], [-1, 0], [-1, 1], [1, -1], [-1, -1], [1, 1]]) {
+      
+      adjPoints.push([castle[0] + d[0], castle[1] + d[1]]);
+    }
+    let emptyAdjPoints = [];
+    for (var adj of adjPoints) {
+      if (this.pilgrim.map[adj[1]][adj[0]]) {
+        emptyAdjPoints.push(adj);
+      }
+    }
+    return emptyAdjPoints[Math.floor(Math.random() * emptyAdjPoints.length)];
   }
 
   _get_path(start, end) {

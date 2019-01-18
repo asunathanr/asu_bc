@@ -1,5 +1,8 @@
 import { Path } from 'path.js';
 
+const helper = {};
+
+
 helper.new_path = (grid, start, end, speed) => {
   let path = new Path();
   path.make(grid, start, end, speed);
@@ -16,6 +19,13 @@ helper.new_path = (grid, start, end, speed) => {
  */
 helper.at_resource = (x, y, resource_map) => {
   return resource[y][x];
+}
+
+/**
+ * Difference between two coordinates
+ */
+helper.difference = (pos1, pos2) => {
+  return [pos1.x - pos2.x, pos1.y - pos2.y];
 }
 
 export default helper;

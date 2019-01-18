@@ -72,6 +72,10 @@ function is_over(open_set, end) {
  * @param {Array<Array<number>>} end 
  */
 function a_star(grid, start, end, speed) {
+  if (start[0] === end[0] && end[0] === end[1]) {
+    return [];
+  }
+
   var open_set = new BinaryHeap(function(element) {return element.f;});
   open_set.push(new AStarNode(0, start, undefined, 0));
   var closed = new Set();
