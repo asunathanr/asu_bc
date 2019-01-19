@@ -42,6 +42,13 @@ helper.is_adjacent = (location1, location2) => {
 }
 
 /**
+ * @returns if cell is occupied by a robot.
+ */
+helper.is_occupied = (robot_map, cell) => {
+  return robot_map[cell[1]][cell[0]] > 0;
+}
+
+/**
  * Difference between two coordinates
  */
 helper.difference = (pos1, pos2) => {

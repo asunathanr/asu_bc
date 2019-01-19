@@ -26,7 +26,7 @@ export class LoopState {
 
 
 class LoopDeposit {
-  constructor(pilgrim) {
+  constructor(pilgrim, resource_type) {
     this.pilgrim = pilgrim;
     this.castle_pos = this._detect_castle();
   }
@@ -66,6 +66,11 @@ class LoopGather {
   }
 
   check_state() {
+    const pos = this.pilgrim.my_pos();
+    if (!this.pilgrim.getKarboniteMap()[pos[1]][pos[0]] ||
+        !this.pilgrim.getFuelMap()[pos[1]][pos[0]]) {
+          return new LoopToDest(this.pilgrim);
+    }
     if (this.pilgrim.me.karbonite >= SPECS.UNITS[SPECS.PILGRIM].KARBONITE_CAPACITY
       || this.pilgrim.me.fuel >= SPECS.UNITS[SPECS.PILGRIM].FUEL_CAPACITY) {
      return new LoopToCastle(this.pilgrim);
@@ -115,10 +120,13 @@ class LoopToDest {
   }
   
   _pick_nearest_resource() {
-    let nearest_karb = nav.getClosestKarbonite({x: this.pilgrim.me.x, y: this.pilgrim.me.y}, this.pilgrim.getKarboniteMap());
-    let nearest_fuel = nav.getClosestKarbonite({x: this.pilgrim.me.x, y: this.pilgrim.me.y}, this.pilgrim.getFuelMap());
+    let nearest_karb = nav.getClosestResource({x: this.pilgrim.me.x, y: this.pilgrim.me.y}, this.pilgrim.getKarboniteMap());
+    let nearest_fuel = nav.getClosestResource({x: this.pilgrim.me.x, y: this.pilgrim.me.y}, this.pilgrim.getFuelMap());
     let karb_dist = manhattan(this.pilgrim.my_pos(), [nearest_karb.x, nearest_karb.y]);
     let fuel_dist = manhattan(this.pilgrim.my_pos(), [nearest_fuel.x, nearest_fuel.y]);
+    if (helper.is_occupied(this.pilgrim.getKarboniteMap(), nearest_karb) && helper.is_occupied(this.pilgrim.getFuelMap(), nearest_fuel)) {
+      
+    }
     if (Math.floor(Math.min(karb_dist, fuel_dist)) === karb_dist) {
       return nearest_karb;
     } else {

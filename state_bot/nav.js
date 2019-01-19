@@ -1,3 +1,5 @@
+import helper from './helper.js';
+
 const nav = {};
 
 nav.compass = [
@@ -120,13 +122,13 @@ nav.sqDist = (start, end) => {
     return Math.pow(start.x - end.x, 2) + Math.pow(start.y - end.y, 2);
 };
 
-nav.getClosestKarbonite = (loc, karbMap) => {
-    const mapLen = karbMap.length;
+nav.getClosestResource = (loc, resourceMap) => {
+    const mapLen = resourceMap.length;
     let closestLoc = null;
     let closestDist = 100000; // Large number;
     for (let y = 0; y < mapLen; y++) {
         for (let x = 0; x < mapLen; x++) {
-            if (karbMap[y][x] && nav.sqDist({x,y}, loc) < closestDist) {
+            if (resourceMap[y][x] && nav.sqDist({x,y}, loc) < closestDist) {
                 closestDist = nav.sqDist({x,y}, loc);
                 closestLoc = {x,y};
             }
