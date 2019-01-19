@@ -26,8 +26,9 @@ export class LoopState {
 
 
 class LoopDeposit {
-  constructor(pilgrim, resource_type) {
+  constructor(pilgrim, resource_type = CONSTANTS.RESOURCE_TYPE.KARBONITE) {
     this.pilgrim = pilgrim;
+    this.resource_type = resource_type;
     this.castle_pos = this._detect_castle();
   }
 
@@ -61,8 +62,9 @@ class LoopDeposit {
 }
 
 class LoopGather {
-  constructor(pilgrim) {
+  constructor(pilgrim, resource_type = CONSTANTS.RESOURCE_TYPE.KARBONITE) {
     this.pilgrim = pilgrim;
+    this.resource_type = resource_type;
   }
 
   check_state() {
@@ -86,8 +88,9 @@ class LoopGather {
 }
 
 class LoopToDest {
-  constructor(pilgrim) {
+  constructor(pilgrim, resource_type = CONSTANTS.RESOURCE_TYPE.KARBONITE) {
     this.pilgrim = pilgrim;
+    this.resource_type = resource_type;
     this.resource_location = this._pick_nearest_resource();
     this.pilgrim.log("Traveling to resource location: " + this.resource_location.x.toString() + ','+ this.resource_location.y.toString());
     this.path = helper.new_path(
@@ -136,8 +139,9 @@ class LoopToDest {
 }
 
 class LoopToCastle {
-  constructor(pilgrim) {
+  constructor(pilgrim, resource_type = CONSTANTS.RESOURCE_TYPE.KARBONITE) {
     this.pilgrim = pilgrim;
+    this.resource_type = resource_type;
     this.castle = this._choose_dump_point();
     this.deposit_path = helper.new_path(this.pilgrim.map, this.pilgrim.my_pos(), this.castle, CONSTANTS.PILGRIM_SPEED);
   }
