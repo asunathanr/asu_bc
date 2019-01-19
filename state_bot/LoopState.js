@@ -123,18 +123,12 @@ class LoopToDest {
   }
   
   _pick_nearest_resource() {
-    let nearest_karb = nav.getClosestResource({x: this.pilgrim.me.x, y: this.pilgrim.me.y}, this.pilgrim.getKarboniteMap());
-    let nearest_fuel = nav.getClosestResource({x: this.pilgrim.me.x, y: this.pilgrim.me.y}, this.pilgrim.getFuelMap());
-    let karb_dist = manhattan(this.pilgrim.my_pos(), [nearest_karb.x, nearest_karb.y]);
-    let fuel_dist = manhattan(this.pilgrim.my_pos(), [nearest_fuel.x, nearest_fuel.y]);
-    if (helper.is_occupied(this.pilgrim.getKarboniteMap(), nearest_karb) && helper.is_occupied(this.pilgrim.getFuelMap(), nearest_fuel)) {
-      
+    let nearest_resource = nav.getClosestResource({x: this.pilgrim.me.x, y: this.pilgrim.me.y}, helper.resource_map(this.pilgrim, this.resource_type));
+    if (helper.is_occupied(this.pilgrim.getVisibleRobotMap(), [nearest_resource[0], nearest_resource[1]])) {
+      let all_empty_resources = helper.empty_resource_locations(this.pilgrim, CONSTANTS.RESOURCE_TYPE);
+      nearest_resource = helper.random_item(all_empty_resources);
     }
-    if (Math.floor(Math.min(karb_dist, fuel_dist)) === karb_dist) {
-      return nearest_karb;
-    } else {
-      return nearest_fuel;
-    }
+    return nearest_resource;
   }
 }
 
@@ -181,7 +175,6 @@ class LoopToCastle {
     var castle = this._detect_castle();
     let adjPoints = [];
     for (let d of CONSTANTS.ADJACENT_DELTAS) {
-      
       adjPoints.push([castle[0] + d[0], castle[1] + d[1]]);
     }
     let emptyAdjPoints = [];

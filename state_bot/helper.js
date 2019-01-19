@@ -1,10 +1,11 @@
 import { Path } from 'path.js';
 import { manhattan } from './pathfinder.js';
+import CONSTANTS from './constants.js';
 
 const helper = {};
 
 /**
- * @param {MyRobot} unit: The robot under consideration. If current bot is desired bot use this.me as the argument.
+ * @param {MyRobot.me} unit: The robot under consideration. If current bot is desired bot use this.me as the argument.
  * @param {CONSTANTS.RESOURCE_TYPE} resource_type:
  * @param {function} predicate_fn: Takes one argument which is either fuel or karbonite values of unit.
  * @returns {boolean} Whether fn is true or false.
@@ -19,6 +20,70 @@ helper.check_resource = (unit, resource_type, predicate_fn) => {
       Error('check_resource function call failed: resource_type argument was neither karbonite or fuel.');
   }
 }
+
+/**
+ * @returns The amount of resources a unit holds based on resource_type
+ */
+helper.resource_value = (unit, resource_type) => {
+  let value = 0;
+  switch (resource_type) {
+    case CONSTANTS.RESOURCE_TYPE.KARBONITE:
+      value = unit.karbonite;
+      break;
+    case CONSTANTS.RESOURCE_TYPE.FUEL:
+      value = unit.fuel;
+      break;
+    default:
+      Error('resource_value function call failed: resource_type argument was neither karbonite or fuel.');
+  }
+  return value;
+}
+
+helper.resource_map = (robot, resource_type) => {
+  let value = 0;
+  switch (resource_type) {
+    case CONSTANTS.RESOURCE_TYPE.KARBONITE:
+      value = robot.karbonite;
+      break;
+    case CONSTANTS.RESOURCE_TYPE.FUEL:
+      value = robot.fuel;
+      break;
+    default:
+      Error('resource_value function call failed: resource_type argument was neither karbonite or fuel.');
+  }
+  return value;
+}
+
+helper.resource_locations = (robot, resource_type) => {
+  const resource_map = helper.resource_map(robot, resource_type);
+  resource_locations = [];
+  for (let y = 0; y < resource_map.length; ++y) {
+    for (let x = 0; x < resource_map.length; ++x) {
+      if (resource_map[y][x]) {
+        resource_locations.push([x, y]);
+      }
+    }
+  }
+  return resource_locations;
+}
+
+helper.empty_resource_locations = (robot, resource_type) => {
+  const all_locations = helper.resource_locations(robot, resource_type);
+  return all_locations.filter((loc) => {
+    return robot.getVisibleRobotMap()[loc[1]][loc[0]];
+  });
+}
+
+helper.random_item = (arr) => {
+  const ERROR_NAME = 'random_item: ';
+  if (!(arr instanceof array)) {
+    Error(ERROR_NAME.concat('parameter is not an array.'));
+  }
+  if (arr.length === 0) {
+    Error(ERROR_NAME.concat('array is empty'));
+  }
+  return arr[Math.floor(Math.random() * arr.length)];
+};
 
 helper.new_path = (grid, start, end, speed) => {
   let path = new Path();
