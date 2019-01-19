@@ -112,7 +112,11 @@ class LoopToDest {
     let nearest_fuel = nav.getClosestKarbonite({x: this.pilgrim.me.x, y: this.pilgrim.me.y}, this.pilgrim.getFuelMap());
     let karb_dist = manhattan(this.pilgrim.my_pos(), [nearest_karb.x, nearest_karb.y]);
     let fuel_dist = manhattan(this.pilgrim.my_pos(), [nearest_fuel.x, nearest_fuel.y]);
-    return nearest_karb ? Math.min(karb_dist, fuel_dist) : nearest_fuel;
+    if (Math.floor(Math.min(karb_dist, fuel_dist)) === karb_dist) {
+      return nearest_karb;
+    } else {
+      return nearest_fuel;
+    }
   }
 }
 
