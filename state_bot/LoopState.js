@@ -1,7 +1,7 @@
 import helper from './helper.js';
 import { SPECS } from './battlecode';
 import { manhattan, neighbors } from './pathfinder.js';
-import SPEEDS from './speeds.js';
+import CONSTANTS from './constants.js';
 import nav from './nav.js';
 
 /**
@@ -89,11 +89,14 @@ class LoopToDest {
       this.pilgrim.map,
       this.pilgrim.my_pos(),
       [this.resource_location.x, this.resource_location.y], 
-      SPEEDS.PILGRIM
+      CONSTANTS.PILGRIM_SPEED
     );
   }
 
   check_state() {
+    if (helper.is_adjacent(this.pilgrim.my_pos(), [this.resource_location.x, this.resource_location.y])) {
+      return new LoopGather(this.pilgrim);
+    }
     if (this.path.at_path_end()) {
       return new LoopGather(this.pilgrim);
     }
@@ -101,7 +104,7 @@ class LoopToDest {
   } 
 
   act() {
-    if (neighbors(this.pilgrim.map, this.pilgrim.my_pos(), SPEEDS.PILGRIM).has([this.resource_location.x, this.resource_location.y])) {
+    if (neighbors(this.pilgrim.map, this.pilgrim.my_pos(), CONSTANTS.PILGRIM_SPEED).has([this.resource_location.x, this.resource_location.y])) {
       return this.pilgrim.move(this.resource_location.x - this.pilgrim.my_pos()[0], this.resource_location.y - this.pilgrim.my_pos()[1]);
     }
     if (this.path.at_path_end()) {
@@ -128,7 +131,7 @@ class LoopToCastle {
   constructor(pilgrim) {
     this.pilgrim = pilgrim;
     this.castle = this._choose_dump_point();
-    this.deposit_path = helper.new_path(this.pilgrim.map, this.pilgrim.my_pos(), this.castle, SPEEDS.PILGRIM);
+    this.deposit_path = helper.new_path(this.pilgrim.map, this.pilgrim.my_pos(), this.castle, CONSTANTS.PILGRIM_SPEED);
   }
 
   check_state() {
@@ -165,7 +168,7 @@ class LoopToCastle {
   _choose_dump_point() {
     var castle = this._detect_castle();
     let adjPoints = [];
-    for (let d of [[0, 1], [0, -1], [1, 0], [-1, 0], [-1, 1], [1, -1], [-1, -1], [1, 1]]) {
+    for (let d of CONSTANTS.ADJACENT_DELTAS) {
       
       adjPoints.push([castle[0] + d[0], castle[1] + d[1]]);
     }
