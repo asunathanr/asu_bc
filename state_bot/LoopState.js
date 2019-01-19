@@ -11,7 +11,7 @@ export class LoopState {
   constructor(pilgrim) {
     this.pilgrim = pilgrim;
     this.pilgrim.log("Pilgrim " + pilgrim.me.id.toString() + " is in loop state");
-    this.state = new LoopToDest(this.pilgrim);
+    this.state = new LoopToDest(this.pilgrim, CONSTANTS.RESOURCE_TYPE.KARBONITE);
   }
 
   check_state() {
@@ -193,3 +193,4 @@ class LoopToCastle {
     return emptyAdjPoints[Math.floor(Math.random() * emptyAdjPoints.length)];
   }
 }
+

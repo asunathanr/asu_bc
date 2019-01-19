@@ -3,6 +3,22 @@ import { manhattan } from './pathfinder.js';
 
 const helper = {};
 
+/**
+ * @param {MyRobot} unit: The robot under consideration. If current bot is desired bot use this.me as the argument.
+ * @param {CONSTANTS.RESOURCE_TYPE} resource_type:
+ * @param {function} predicate_fn: Takes one argument which is either fuel or karbonite values of unit.
+ * @returns {boolean} Whether fn is true or false.
+ */
+helper.check_resource = (unit, resource_type, predicate_fn) => {
+  switch (resource_type) {
+    case CONSTANTS.RESOURCE_TYPE.KARBONITE:
+      return predicate_fn(unit.karbonite);
+    case CONSTANTS.RESOURCE_TYPE.FUEL:
+      return predicate_fn(unit.fuel);
+    default:
+      Error('check_resource function call failed: resource_type argument was neither karbonite or fuel.');
+  }
+}
 
 helper.new_path = (grid, start, end, speed) => {
   let path = new Path();
@@ -47,6 +63,8 @@ helper.is_adjacent = (location1, location2) => {
 helper.is_occupied = (robot_map, cell) => {
   return robot_map[cell[1]][cell[0]] > 0;
 }
+
+
 
 /**
  * Difference between two coordinates
