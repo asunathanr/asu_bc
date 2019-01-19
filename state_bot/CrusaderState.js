@@ -45,7 +45,7 @@ export class CrusaderState extends AbstractState{
         // get attackable robots
 	    this.attackable = this.attackable = this.crusader.getAttackableRobots();
         //if attackable units, go to attack_state
-        if(this.attackable.length > 0){
+        if (this.attackable.length > 0) {
             return this.attack_state;
         }
         //if destintaion is reached, change destination to random point on enemy half of map

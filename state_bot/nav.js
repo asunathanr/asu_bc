@@ -178,7 +178,7 @@ nav.getHalfBounds = (cell,grid) => {
         }
     }
     else {
-        if(cell.x < grid.length/2){
+        if(cell.x < grid.length/2) {
             return {xlo:0, xhi:grid.length/2, ylo:0, yhi:grid.length};
         }
         else {

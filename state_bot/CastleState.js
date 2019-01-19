@@ -1,6 +1,7 @@
 import { AbstractState } from './AbstractState.js';
 import { SPECS } from 'battlecode';
 import nav from './nav.js';
+import helper from './helper.js';
 
 const CRUSADER_TYPE = SPECS.CRUSADER;
 const PILGRIM_TYPE = SPECS.PILGRIM;
@@ -145,6 +146,8 @@ export class CastleState extends AbstractState {
      * @returns Which unit to build.
      */
     pick_unit() {
+        let visible_pilgrims = helper.filter_by_type(this.castle.getVisibleRobots(), SPECS.PILGRIM);
+        
         let unit = CRUSADER_TYPE;
         if (this.prev_unit !== null) {
             unit = CRUSADER_TYPE;

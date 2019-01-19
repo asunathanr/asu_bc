@@ -10,6 +10,15 @@ helper.new_path = (grid, start, end, speed) => {
 };
 
 /**
+ * Filter a list of robots down to a single unit type.
+ */
+helper.filter_by_type = (robots, desired_type) => {
+  return robots.filter((robot) => {
+    return robot.type === desired_type;
+  });
+}
+
+/**
  * Is the designated (x, y) a resource?
  * Works for both karbonite and fuel.
  * @param {number} x

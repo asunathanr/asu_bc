@@ -53,7 +53,6 @@ class LoopDeposit {
   _detect_castle() {
     for (let robot of this.pilgrim.getVisibleRobots()) {
       if (robot.unit === SPECS.CASTLE) {
-        this.pilgrim.log("Castle is at " + robot.x.toString() + ',' + robot.y.toString());
         return [robot.x, robot.y];
       }
     }
