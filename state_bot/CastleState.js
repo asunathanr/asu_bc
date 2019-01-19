@@ -5,6 +5,7 @@ import helper from './helper.js';
 
 const CRUSADER_TYPE = SPECS.CRUSADER;
 const PILGRIM_TYPE = SPECS.PILGRIM;
+const MAX_VISIBLE_PILGRIMS = 3;
 
 /**
  * CastleState is the state machine for the Castle units
@@ -49,7 +50,7 @@ export class CastleState extends AbstractState {
         
         this.empty_resource_cells = this.build_locations.filter((cell) => {
             return this.castle.getKarboniteMap()[cell[1]][cell[0]] || this.castle.getFuelMap()[cell[1]][cell[0]];
-        });
+        }, this);
 
         //calculate my_half bounds
         this.my_half = nav.getHalfBounds({x:this.castle.me.x,y:this.castle.me.y},this.castle.map);
@@ -147,13 +148,12 @@ export class CastleState extends AbstractState {
      */
     pick_unit() {
         let visible_pilgrims = helper.filter_by_type(this.castle.getVisibleRobots(), SPECS.PILGRIM);
-        
-        let unit = CRUSADER_TYPE;
-        if (this.prev_unit !== null) {
-            unit = CRUSADER_TYPE;
+        let unit;
+        if (visible_pilgrims.length < MAX_VISIBLE_PILGRIMS) {
+            unit = PILGRIM_TYPE;
         } 
         else {
-            unit = PILGRIM_TYPE;
+            unit = CRUSADER_TYPE;
         }
         return unit;
     }

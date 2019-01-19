@@ -14,7 +14,7 @@ helper.new_path = (grid, start, end, speed) => {
  */
 helper.filter_by_type = (robots, desired_type) => {
   return robots.filter((robot) => {
-    return robot.type === desired_type;
+    return robot.unit === desired_type;
   });
 }
 
