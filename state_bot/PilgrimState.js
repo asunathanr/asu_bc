@@ -19,9 +19,6 @@ export class PilgrimState extends AbstractState {
     super();
     this.current_state = new InitialState(pilgrim);
     this.pilgrim = pilgrim;
-    this.resource_location = nav.getClosestKarbonite({x: pilgrim.me.x, y: pilgrim.me.y}, pilgrim.getKarboniteMap());
-    this.deposit_path = null;
-    this.gather_path = null;
   }
 
   check_state() {
@@ -39,7 +36,7 @@ class InitialState {
   }
 
   check_state() {
-    var new_state;
+    let new_state;
     if (this.pilgrim.getKarboniteMap()[this.pilgrim.me.y][this.pilgrim.me.x] ||
         this.pilgrim.getFuelMap()[this.pilgrim.me.y][this.pilgrim.me.x]) {
           new_state = new StationaryState(this.pilgrim);

@@ -1,4 +1,5 @@
 import { Path } from 'path.js';
+import { manhattan } from './pathfinder.js';
 
 const helper = {};
 
@@ -28,6 +29,16 @@ helper.filter_by_type = (robots, desired_type) => {
  */
 helper.at_resource = (x, y, resource_map) => {
   return resource[y][x];
+}
+
+/**
+ * Tells whether one location is one tile away from another.
+ * @param {array} location1: First location to check for adjacency.
+ * @param {array} location2: Second location to check for adjacency.
+ * @returns {boolean} if location1 is one tile away from location two.
+ */
+helper.is_adjacent = (location1, location2) => {
+  return manhattan(location1, location2) === 1;
 }
 
 /**

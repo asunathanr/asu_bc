@@ -1,6 +1,6 @@
 import helper from './helper.js';
 import { SPECS } from './battlecode';
-import { manhattan } from './pathfinder.js';
+import { manhattan, neighbors } from './pathfinder.js';
 import SPEEDS from './speeds.js';
 import nav from './nav.js';
 
@@ -84,6 +84,7 @@ class LoopToDest {
   constructor(pilgrim) {
     this.pilgrim = pilgrim;
     this.resource_location = this._pick_nearest_resource();
+    this.pilgrim.log("Traveling to resource location: " + this.resource_location.x.toString() + ','+ this.resource_location.y.toString());
     this.path = helper.new_path(
       this.pilgrim.map,
       this.pilgrim.my_pos(),
@@ -100,6 +101,9 @@ class LoopToDest {
   } 
 
   act() {
+    if (neighbors(this.pilgrim.map, this.pilgrim.my_pos(), SPEEDS.PILGRIM).has([this.resource_location.x, this.resource_location.y])) {
+      return this.pilgrim.move(this.resource_location.x - this.pilgrim.my_pos()[0], this.resource_location.y - this.pilgrim.my_pos()[1]);
+    }
     if (this.path.at_path_end()) {
       return;
     } 
@@ -123,11 +127,14 @@ class LoopToDest {
 class LoopToCastle {
   constructor(pilgrim) {
     this.pilgrim = pilgrim;
-    let castle = this._choose_dump_point();
-    this.deposit_path = helper.new_path(this.pilgrim.map, this.pilgrim.my_pos(), castle, SPEEDS.PILGRIM);
+    this.castle = this._choose_dump_point();
+    this.deposit_path = helper.new_path(this.pilgrim.map, this.pilgrim.my_pos(), this.castle, SPEEDS.PILGRIM);
   }
 
   check_state() {
+    if (helper.is_adjacent(this.pilgrim.my_pos(), this.castle)) {
+      return new LoopDeposit(this.pilgrim);
+    }
     if (this.deposit_path.at_path_end()) {
       return new LoopDeposit(this.pilgrim);
     }
@@ -146,7 +153,6 @@ class LoopToCastle {
   _detect_castle() {
     for (let robot of this.pilgrim.getVisibleRobots()) {
       if (robot.unit === SPECS.CASTLE) {
-        this.pilgrim.log("Castle is at " + robot.x.toString() + ',' + robot.y.toString());
         return [robot.x, robot.y];
       }
     }
