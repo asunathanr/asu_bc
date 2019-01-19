@@ -1,18 +1,12 @@
 import { AbstractState } from './AbstractState.js';
-import { SPECS } from './battlecode';
 import { LoopState } from './LoopState.js';
 import { StationaryState } from './StationaryState.js';
-import nav from 'nav.js';
 
 
 /**
  * State machine to control pilgrim units.
- * @property actions: A map of pilgrim states to pilgrim actions.
  * @property current_state: Which state to act upon next.
- * @property {MyRobot} pilgrim: The pilgrim to API interface class.
- * @property castle_pos: Where to deposit resources.
- * @property destination: Resource location.
- * @property path: The set path between resource cell and delivery position.
+ * @property {MyRobot} pilgrim: Reference to current pilgrim.
  */
 export class PilgrimState extends AbstractState {
   constructor(pilgrim) {
@@ -30,6 +24,9 @@ export class PilgrimState extends AbstractState {
   }
 }
 
+/**
+ * @property {MyRobot} pilgrim: Reference to current pilgrim bot.
+ */
 class InitialState {
   constructor(pilgrim) {
     this.pilgrim = pilgrim;
