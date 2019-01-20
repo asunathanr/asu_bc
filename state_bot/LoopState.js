@@ -92,17 +92,17 @@ class LoopToDest {
     this.pilgrim = pilgrim;
     this.resource_type = resource_type;
     this.resource_location = this._pick_nearest_resource();
-    this.pilgrim.log("Traveling to resource location: " + this.resource_location.x.toString() + ','+ this.resource_location.y.toString());
+    
     this.path = helper.new_path(
       this.pilgrim.map,
       this.pilgrim.my_pos(),
-      [this.resource_location.x, this.resource_location.y], 
+      [this.resource_location[0], this.resource_location[1]], 
       CONSTANTS.PILGRIM_SPEED
     );
   }
 
   check_state() {
-    if (helper.is_adjacent(this.pilgrim.my_pos(), [this.resource_location.x, this.resource_location.y])) {
+    if (helper.same_position(this.pilgrim.my_pos(), this.resource_location)) {
       return new LoopGather(this.pilgrim);
     }
     if (this.path.at_path_end()) {
@@ -112,9 +112,9 @@ class LoopToDest {
   } 
 
   act() {
-    if (neighbors(this.pilgrim.map, this.pilgrim.my_pos(), CONSTANTS.PILGRIM_SPEED).has([this.resource_location.x, this.resource_location.y])) {
-      return this.pilgrim.move(this.resource_location.x - this.pilgrim.my_pos()[0], this.resource_location.y - this.pilgrim.my_pos()[1]);
-    }
+    //if (neighbors(this.pilgrim.map, this.pilgrim.my_pos(), CONSTANTS.PILGRIM_SPEED).has([this.resource_location[1], this.resource_location[1]])) {
+      //return this.pilgrim.move(this.resource_location[0] - this.pilgrim.my_pos()[0], this.resource_location[1] - this.pilgrim.my_pos()[1]);
+    //}
     if (this.path.at_path_end()) {
       return;
     } 
@@ -124,20 +124,29 @@ class LoopToDest {
   
   _pick_nearest_resource() {
     let nearest_resource = nav.getClosestResource({x: this.pilgrim.me.x, y: this.pilgrim.me.y}, helper.resource_map(this.pilgrim, this.resource_type));
-    if (helper.is_occupied(this.pilgrim.getVisibleRobotMap(), [nearest_resource[0], nearest_resource[1]])) {
-      let all_empty_resources = helper.empty_resource_locations(this.pilgrim, CONSTANTS.RESOURCE_TYPE);
-      nearest_resource = helper.random_item(all_empty_resources);
+    nearest_resource = helper.convert_assoc_coord(nearest_resource);
+    if (nearest_resource === null || nearest_resource === undefined ||
+       helper.is_occupied(this.pilgrim.getVisibleRobotMap(), nearest_resource)) {
+        
+      let all_empty_resources = helper.empty_resource_locations(this.pilgrim, this.resource_type);
+      nearest_resource = all_empty_resources[0];
+      this.pilgrim.log("Nearest resource: " + nearest_resource[1].toString() + ',' + nearest_resource[1].toString());
     }
     return nearest_resource;
   }
 }
 
+
 class LoopToCastle {
   constructor(pilgrim, resource_type = CONSTANTS.RESOURCE_TYPE.KARBONITE) {
     this.pilgrim = pilgrim;
     this.resource_type = resource_type;
+    this.pilgrim.log("Going to castle.");
     this.castle = this._choose_dump_point();
-    this.deposit_path = helper.new_path(this.pilgrim.map, this.pilgrim.my_pos(), this.castle, CONSTANTS.PILGRIM_SPEED);
+    this.deposit_path = helper.new_path(this.pilgrim.map,
+       this.pilgrim.my_pos(),
+       this.castle,
+       CONSTANTS.PILGRIM_SPEED);
   }
 
   check_state() {

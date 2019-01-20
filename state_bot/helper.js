@@ -19,7 +19,16 @@ helper.check_resource = (unit, resource_type, predicate_fn) => {
     default:
       Error('check_resource function call failed: resource_type argument was neither karbonite or fuel.');
   }
-}
+};
+
+/**
+ * Converts a coordinate represented as an associative array to an array.
+ * @param assoc_coords: {x, y}
+ * @returns {array}
+ */
+helper.convert_assoc_coord = (assoc_coord) => {
+  return [assoc_coord.x, assoc_coord.y];
+};
 
 /**
  * @returns The amount of resources a unit holds based on resource_type
@@ -34,29 +43,29 @@ helper.resource_value = (unit, resource_type) => {
       value = unit.fuel;
       break;
     default:
-      Error('resource_value function call failed: resource_type argument was neither karbonite or fuel.');
+      throw Error('resource_value function call failed: resource_type argument was neither karbonite or fuel.');
   }
   return value;
-}
+};
 
 helper.resource_map = (robot, resource_type) => {
   let value = 0;
   switch (resource_type) {
     case CONSTANTS.RESOURCE_TYPE.KARBONITE:
-      value = robot.karbonite;
+      value = robot.getKarboniteMap();
       break;
     case CONSTANTS.RESOURCE_TYPE.FUEL:
-      value = robot.fuel;
+      value = robot.getFuelMap();
       break;
     default:
-      Error('resource_value function call failed: resource_type argument was neither karbonite or fuel.');
+      value = Error('resource_value function call failed: resource_type argument was neither karbonite or fuel.');
   }
   return value;
-}
+};
 
 helper.resource_locations = (robot, resource_type) => {
   const resource_map = helper.resource_map(robot, resource_type);
-  resource_locations = [];
+  let resource_locations = [];
   for (let y = 0; y < resource_map.length; ++y) {
     for (let x = 0; x < resource_map.length; ++x) {
       if (resource_map[y][x]) {
@@ -65,22 +74,24 @@ helper.resource_locations = (robot, resource_type) => {
     }
   }
   return resource_locations;
-}
+};
+
+helper.same_position = (pos1, pos2) => {
+  return pos1[0] === pos2[0] && pos1[1] === pos2[1];
+};
 
 helper.empty_resource_locations = (robot, resource_type) => {
   const all_locations = helper.resource_locations(robot, resource_type);
+  robot.log("All locations: " + all_locations[0].toString());
   return all_locations.filter((loc) => {
-    return robot.getVisibleRobotMap()[loc[1]][loc[0]];
+    return robot.getVisibleRobotMap()[loc[1]][loc[0]] < 1;
   });
-}
+};
 
 helper.random_item = (arr) => {
   const ERROR_NAME = 'random_item: ';
-  if (!(arr instanceof array)) {
-    Error(ERROR_NAME.concat('parameter is not an array.'));
-  }
   if (arr.length === 0) {
-    Error(ERROR_NAME.concat('array is empty'));
+    return Error(ERROR_NAME.concat('array is empty'));
   }
   return arr[Math.floor(Math.random() * arr.length)];
 };
@@ -128,8 +139,6 @@ helper.is_adjacent = (location1, location2) => {
 helper.is_occupied = (robot_map, cell) => {
   return robot_map[cell[1]][cell[0]] > 0;
 }
-
-
 
 /**
  * Difference between two coordinates

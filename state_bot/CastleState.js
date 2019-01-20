@@ -48,10 +48,13 @@ export class CastleState extends AbstractState {
             return castle.getPassableMap()[cell[1], cell[0]];
         });
         
-        this.empty_resource_cells = this.build_locations.filter((cell) => {
-            return this.castle.getKarboniteMap()[cell[1]][cell[0]] || this.castle.getFuelMap()[cell[1]][cell[0]];
-        }, this);
-
+        // Unassigned resource cells in build location
+        if (this.build_locations.length > 0) {
+            this.empty_resource_cells = this.build_locations.filter((cell) => {
+                return castle.getKarboniteMap()[cell[1]][cell[0]] || castle.getFuelMap()[cell[1]][cell[0]];
+            });
+        }
+    
         //calculate my_half bounds
         this.my_half = nav.getHalfBounds({x:this.castle.me.x,y:this.castle.me.y},this.castle.map);
 

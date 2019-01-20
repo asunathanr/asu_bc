@@ -162,7 +162,7 @@ nav.isHorizontalReflection = (grid) => {
     }
     //todo: implement handling for perfectly symmetric map
     throw Error('failed to compute map symmetry');
-}
+};
 
 /**
  * helper function to get lower and upper bounds of a map half
