@@ -153,4 +153,23 @@ helper.on_map = (size, pos) => {
   return pos[0] >= 0 && pos[1] >= 0 && pos[0] < size && pos[1] < size;
 }
 
+ /* filters visible robots for robots that are currently radioing
+ * @param self: { MyRobot } object
+ * @returns list of robots that are signaling
+ */
+helper.getRadioingRobots = (self) => {
+  return self.getVisibleRobots().filter((r) => {
+    return self.isRadioing(r);
+  });
+}
+
+/**
+ * hashes the current value by mod 256
+ * @param signal: the integer to be hased
+ * @returns the mod 256 of the signal
+ */
+helper.castleHash = (signal) => {
+    return signal%256;
+}
+
 export default helper;

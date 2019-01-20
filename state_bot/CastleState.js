@@ -15,6 +15,9 @@ const MAX_VISIBLE_PILGRIMS = 3;
  * @property build_locations: a list of potential build locations (passable).
  * @property attackable: robots in attack range of the castle.
  * @property my_half: {xlo,xhi,ylo,yhi} object containg bounds describing this units half of the map.
+ * @property units: dictionary of r.id:r.unit
+ * @property unit_counts: dictionary of r.unit:unit_count
+ * @property my_castle_locations: list of coordinate objects where my castles are.
  */
 export class CastleState extends AbstractState {
 
@@ -30,6 +33,9 @@ export class CastleState extends AbstractState {
         this.prev_unit = null;
         this.attackable = [];
         this.my_half = {xlo:0, xhi:this.castle.map.length, ylo:0, yhi:this.castle.map.length};
+        this.units = new Map();
+        this.unit_counts = {'0':0,'1':0,'2':0,'3':0,'4':0,'5':0};
+        this.my_castles = [];
     }
 
     /**
@@ -38,6 +44,9 @@ export class CastleState extends AbstractState {
      *          else returns build_state
      */
     initial_state () {
+        //get location of other castles
+        this.my_castles = this.castle.getVisibleRobots();
+
         //calculate a valid build locations
         const dAdj = [[0, 1], [1, 0], [-1, 0], [0, -1], [1, 1], [-1, -1], [-1, 1], [1, -1]];
         let castle = this.castle;
@@ -48,6 +57,9 @@ export class CastleState extends AbstractState {
             return castle.getPassableMap()[cell[1], cell[0]];
         });
         
+        //calculate my_half bounds
+        this.my_half = nav.getHalfBounds({x:this.castle.me.x,y:this.castle.me.y},this.castle.map);
+        
         // Unassigned resource cells in build location
         if (this.build_locations.length > 0) {
             this.empty_resource_cells = [];
@@ -57,9 +69,6 @@ export class CastleState extends AbstractState {
                 }
             }
         }
-    
-        //calculate my_half bounds
-        this.my_half = nav.getHalfBounds({x:this.castle.me.x,y:this.castle.me.y},this.castle.map);
 
         //check if able to build crusader
         if (SPECS.UNITS[CRUSADER_TYPE].CONSTRUCTION_FUEL > this.castle.fuel &&
@@ -119,6 +128,32 @@ export class CastleState extends AbstractState {
      * check_state changes the current_state based on the game state of unit
      */
     check_state () {
+        //this.castle.castleTalk(this.castle.me.unit);
+        //update number of each unit
+        this.unit_counts = {'0':0,'1':0,'2':0,'3':0,'4':0,'5':0};
+        let radioing = this.castle.getVisibleRobots();
+        let tempMap = new Map();
+        for(let r of radioing){
+            if(this.units.has(r.id)){
+                tempMap.set(r.id,this.units.get(r.id));
+            }
+            else{
+                tempMap.set(r.id,r.unit);
+            }
+            this.unit_counts[tempMap.get(r.id)]++;
+        }
+        this.units = tempMap;
+
+        //this.castle.log("turn is " + this.castle.me.turn);
+        //this.castle.log("# of castles: "+ this.unit_counts[SPECS.CASTLE]);
+        
+        //this.castle.log("# of churches: "+ this.unit_counts[SPECS.CHURCH]);
+        //this.castle.log("# of pilgrims: "+ this.unit_counts[SPECS.PILGRIM]);
+        //this.castle.log("# of crusaders: "+ this.unit_counts[SPECS.CRUSADER]);
+        //this.castle.log("# of prophets: "+ this.unit_counts[SPECS.PROPHET]);
+        //this.castle.log("# of preachers: "+ this.unit_counts[SPECS.PREACHER]);
+        
+
         this.current_state = this.current_state();
     }
 

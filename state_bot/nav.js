@@ -1,4 +1,5 @@
 import helper from './helper.js';
+import BinaryHeap from './binary_heap.js';
 
 const nav = {};
 
@@ -166,27 +167,71 @@ nav.isHorizontalReflection = (grid) => {
 
 /**
  * helper function to get lower and upper bounds of a map half
- * @param: cell {x,y}
+ * @param: coordinate to compute half {x,y}
  * @param: grid the passable map grid of MyRobot object
  * @returns: {xlo,xhi,ylo,yhi} object where each attribute is a number defining a bound.
  */
 nav.getHalfBounds = (cell,grid) => {
     if(nav.isHorizontalReflection(grid)){
         if(cell.y < grid.length/2){
-            return {xlo:0, xhi:grid.length, ylo:0, yhi:grid.length/2};
+            return {xlo:0, xhi:grid.length, ylo:0, yhi:Math.floor(grid.length/2)};
         }
         else {
-            return {xlo:0, xhi:grid.length, ylo:grid.length/2, yhi:grid.length};
+            return {xlo:0, xhi:grid.length, ylo:Math.floor(grid.length/2), yhi:grid.length};
         }
     }
     else {
         if(cell.x < grid.length/2) {
-            return {xlo:0, xhi:grid.length/2, ylo:0, yhi:grid.length};
+            return {xlo:0, xhi:Math.floor(grid.length/2), ylo:0, yhi:grid.length};
         }
         else {
-            return {xlo:grid.length/2, xhi:grid.length, ylo:0, yhi:grid.length};
+            return {xlo:Math.floor(grid.length/2), xhi:grid.length, ylo:0, yhi:grid.length};
         }
     }
+}
+
+/**
+ * calculates potential expansion locations
+ * @param robot: { MyRobot } object
+ * @param bounds: {xlo:,xhi:,ylo:,yhi:} object describing the bounds to be searched for resources
+ * @returns: { BinaryHeap } of locations objects {x:,y:}
+ */
+nav.getExpansionLocs = (robot,bounds) => {
+    let expansionLocs = new BinaryHeap(function(element) {return element.resources;});
+
+    for(let x=bounds.xlo;x<bounds.xhi;x++){
+        for(let y=bounds.ylo;y<bounds.yhi;y++){
+            let r = nav.expansionCriteria(robot,x,y);
+            if(r >= 2){
+                expansionLocs.push({'x':x,'y':y,'resources':r});
+            }       
+        }
+    }
+
+    return expansionLocs;
+}
+
+/**
+ * helper function for getExpansionLoc, returns the number of resources adjacent to a coordinate
+ * @param robot: MyRobot object
+ * @param x:
+ * @param y:
+ * @returns: the number of resources adjacent to the coordinate
+ */
+nav.expansionCriteria = (robot,x,y) => {
+    let resources = 0;
+    let directions = [{x: 0, y: -1},{x: 1, y: 0},{x: -1, y: 0},{x: 0, y: 1},
+                        {x: 1, y: 1},{x: -1, y: 1},{x: 1, y: -1},{x: -1, y: -1}];
+    if(robot.map[y][x] && !robot.karbonite_map[y][x] && !robot.fuel_map[y][x]){
+        for(let i of directions){
+            if(x+i.x>0 && x+i.x<robot.map.length && y+i.y>0 && y+i.y<robot.map.length) {
+                    if(robot.karbonite_map[y+i.y][x+i.x] || robot.fuel_map[y+i.y][x+i.x]) {
+                        resources++;
+                    }
+            }
+        }
+    }   
+    return resources;
 }
 
 nav.getRandHalfGrid = (crusader) => {
