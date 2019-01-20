@@ -17,6 +17,7 @@ const MAX_VISIBLE_PILGRIMS = 3;
  * @property my_half: {xlo,xhi,ylo,yhi} object containg bounds describing this units half of the map.
  * @property units: dictionary of r.id:r.unit
  * @property unit_counts: dictionary of r.unit:unit_count
+ * @property my_castle_locations: list of coordinate objects where my castles are.
  */
 export class CastleState extends AbstractState {
 
@@ -34,6 +35,7 @@ export class CastleState extends AbstractState {
         this.my_half = {xlo:0, xhi:this.castle.map.length, ylo:0, yhi:this.castle.map.length};
         this.units = new Map();
         this.unit_counts = {'0':0,'1':0,'2':0,'3':0,'4':0,'5':0};
+        this.my_castles = [];
     }
 
     /**
@@ -42,6 +44,9 @@ export class CastleState extends AbstractState {
      *          else returns build_state
      */
     initial_state () {
+        //get location of other castles
+        this.my_castles = this.castle.getVisibleRobots();
+
         //calculate a valid build locations
         const dAdj = [[0, 1], [1, 0], [-1, 0], [0, -1], [1, 1], [-1, -1], [-1, 1], [1, -1]];
         let castle = this.castle;
@@ -52,15 +57,15 @@ export class CastleState extends AbstractState {
             return castle.getPassableMap()[cell[1], cell[0]];
         });
         
+        //calculate my_half bounds
+        this.my_half = nav.getHalfBounds({x:this.castle.me.x,y:this.castle.me.y},this.castle.map);
+        
         // Unassigned resource cells in build location
         if (this.build_locations.length > 0) {
             this.empty_resource_cells = this.build_locations.filter((cell) => {
                 return castle.getKarboniteMap()[cell[1]][cell[0]] || castle.getFuelMap()[cell[1]][cell[0]];
             });
         }
-    
-        //calculate my_half bounds
-        this.my_half = nav.getHalfBounds({x:this.castle.me.x,y:this.castle.me.y},this.castle.map);
 
         //check if able to build crusader
         if (SPECS.UNITS[CRUSADER_TYPE].CONSTRUCTION_FUEL > this.castle.fuel &&
@@ -125,7 +130,7 @@ export class CastleState extends AbstractState {
         this.unit_counts = {'0':0,'1':0,'2':0,'3':0,'4':0,'5':0};
         let radioing = this.castle.getVisibleRobots();
         let tempMap = new Map();
-        for(r of radioing){
+        for(let r of radioing){
             if(this.units.has(r.id)){
                 tempMap.set(r.id,this.units.get(r.id));
             }
