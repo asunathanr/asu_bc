@@ -1,6 +1,7 @@
 import { AbstractState } from './AbstractState.js';
 import { SPECS } from 'battlecode';
 import nav from './nav.js';
+import helper from './helper.js';
 
 const CRUSADER_TYPE = SPECS.CRUSADER;
 const PILGRIM_TYPE = SPECS.PILGRIM;
@@ -13,6 +14,8 @@ const PILGRIM_TYPE = SPECS.PILGRIM;
  * @property build_locations: a list of potential build locations (passable).
  * @property attackable: robots in attack range of the castle.
  * @property my_half: {xlo,xhi,ylo,yhi} object containg bounds describing this units half of the map.
+ * @property units: dictionary of r.id:r.unit
+ * @property unit_counts: dictionary of r.unit:unit_count
  */
 export class CastleState extends AbstractState {
 
@@ -28,6 +31,8 @@ export class CastleState extends AbstractState {
         this.prev_unit = null;
         this.attackable = [];
         this.my_half = {xlo:0, xhi:this.castle.map.length, ylo:0, yhi:this.castle.map.length};
+        this.units = new Map();
+        this.unit_counts = {'0':0,'1':0,'2':0,'3':0,'4':0,'5':0};
     }
 
     /**
@@ -111,6 +116,32 @@ export class CastleState extends AbstractState {
      * check_state changes the current_state based on the game state of unit
      */
     check_state () {
+        //this.castle.castleTalk(this.castle.me.unit);
+        //update number of each unit
+        this.unit_counts = {'0':0,'1':0,'2':0,'3':0,'4':0,'5':0};
+        let radioing = this.castle.getVisibleRobots();
+        let tempMap = new Map();
+        for(r of radioing){
+            if(this.units.has(r.id)){
+                tempMap.set(r.id,this.units.get(r.id));
+            }
+            else{
+                tempMap.set(r.id,r.unit);
+            }
+            this.unit_counts[tempMap.get(r.id)]++;
+        }
+        this.units = tempMap;
+
+        //this.castle.log("turn is " + this.castle.me.turn);
+        //this.castle.log("# of castles: "+ this.unit_counts[SPECS.CASTLE]);
+        
+        //this.castle.log("# of churches: "+ this.unit_counts[SPECS.CHURCH]);
+        //this.castle.log("# of pilgrims: "+ this.unit_counts[SPECS.PILGRIM]);
+        //this.castle.log("# of crusaders: "+ this.unit_counts[SPECS.CRUSADER]);
+        //this.castle.log("# of prophets: "+ this.unit_counts[SPECS.PROPHET]);
+        //this.castle.log("# of preachers: "+ this.unit_counts[SPECS.PREACHER]);
+        
+
         this.current_state = this.current_state();
     }
 

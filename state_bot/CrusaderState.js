@@ -83,6 +83,7 @@ export class CrusaderState extends AbstractState{
      * check_state changes the current_state based on the game state of unit
      */
     check_state () {
+        //this.crusader.castleTalk(this.crusader.me.unit);
         this.current_state = this.current_state();
     }
 
