@@ -197,14 +197,15 @@ nav.getHalfBounds = (cell,grid) => {
  * @returns: { BinaryHeap } of locations objects {x:,y:}
  */
 nav.getExpansionLocs = (robot,bounds) => {
-    let expansionLocs = new BinaryHeap(function(element) {return element.resources;});
+    //this is pretty bad using negative sign to make this a 'max' heap
+    let expansionLocs = new BinaryHeap(function(element) {return -element['resources'];});
 
     for(let x=bounds.xlo;x<bounds.xhi;x++){
         for(let y=bounds.ylo;y<bounds.yhi;y++){
             let r = nav.expansionCriteria(robot,x,y);
             if(r >= 2){
                 expansionLocs.push({'x':x,'y':y,'resources':r});
-            }       
+            }
         }
     }
 
@@ -224,13 +225,16 @@ nav.expansionCriteria = (robot,x,y) => {
                         {x: 1, y: 1},{x: -1, y: 1},{x: 1, y: -1},{x: -1, y: -1}];
     if(robot.map[y][x] && !robot.karbonite_map[y][x] && !robot.fuel_map[y][x]){
         for(let i of directions){
-            if(x+i.x>0 && x+i.x<robot.map.length && y+i.y>0 && y+i.y<robot.map.length) {
+            if(x+i.x>=0 && x+i.x<robot.map.length && y+i.y>=0 && y+i.y<robot.map.length) {
                     if(robot.karbonite_map[y+i.y][x+i.x] || robot.fuel_map[y+i.y][x+i.x]) {
                         resources++;
                     }
             }
         }
     }   
+    if(resources >= 2) {
+        robot.log(x+','+y+' has '+resources+' resources');
+    }
     return resources;
 }
 

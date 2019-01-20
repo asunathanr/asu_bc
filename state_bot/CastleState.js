@@ -60,6 +60,14 @@ export class CastleState extends AbstractState {
         //calculate my_half bounds
         this.my_half = nav.getHalfBounds({x:this.castle.me.x,y:this.castle.me.y},this.castle.map);
         
+        /*
+        let expansionLocs = nav.getExpansionLocs(this.castle,this.my_half);
+        while(expansionLocs.size() > 0){
+            let loc = expansionLocs.pop();
+            this.castle.log("Expansion location at: " + loc['x'] +','+ loc['y']);
+        }
+        */
+        
         // Unassigned resource cells in build location
         if (this.build_locations.length > 0) {
             this.empty_resource_cells = [];
