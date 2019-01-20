@@ -9,8 +9,7 @@ import nav from './nav.js';
 export class ExpandState {
   constructor(pilgrim) {
     this.pilgrim = pilgrim;
-    
-    this.church_pos = nav.getExpansionLocs(this.pilgrim, {xlo:0, xhi:this.pilgrim.map.length, ylo:0, yhi:this.pilgrim.map.length});
+    this.church_pos = nav.getExpansionLocs(this.pilgrim, {xlo:0, xhi:this.pilgrim.map.length, ylo:0, yhi:this.pilgrim.map.length}).pop();
     this.destination = this._pick_destination();
     this.current_state = new TravelState(this.pilgrim, this);
   }
@@ -32,6 +31,9 @@ export class ExpandState {
     return this.current_state.act();
   }
   
+  /**
+   * Choose destination for pilgrim to travel to.
+   */
   _pick_destination() {
     let possible_destinations = [];
     for (let adjDelta of CONSTANTS.ADJACENT_DELTAS) {
@@ -43,9 +45,11 @@ export class ExpandState {
       }
     }
 
+    // If possible destinations failed will just travel to (0, 0). Probably want to change this.
     if (possible_destinations.length === 0) {
       return {x: 0, y: 0};
     }
+    this.pilgrim.log("Chosen destination: " + possible_destinations[0].toString());
     return possible_destinations[0];
   }
 }
@@ -81,7 +85,11 @@ class BuildChurchState {
   }
 
   act() {
-    return this.pilgrim.buildUnit(SPECS.CHURCH, this.parent.get_expansion_destination());
+    let buildDelta = {
+       x: this.parent.get_church_pos().x - this.pilgrim.my_pos()[0],
+       y: this.parent.get_church_pos().y - this.pilgrim.my_pos()[1]
+    }
+    return this.pilgrim.buildUnit(SPECS.CHURCH, buildDelta.x, buildDelta.y);
   }
 }
 

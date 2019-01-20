@@ -2,7 +2,11 @@ import { AbstractState } from './AbstractState.js';
 import { LoopState } from './LoopState.js';
 import { ExpandState } from './ExpandState.js';
 import { StationaryState } from './StationaryState.js';
+import { SPECS } from 'battlecode';
+import helper from './helper.js';
 
+
+const PILGRIM_LIMIT = 3;
 
 /**
  * State machine to control pilgrim units.
@@ -38,6 +42,8 @@ class InitialState {
     if (this.pilgrim.getKarboniteMap()[this.pilgrim.me.y][this.pilgrim.me.x] ||
         this.pilgrim.getFuelMap()[this.pilgrim.me.y][this.pilgrim.me.x]) {
           new_state = new StationaryState(this.pilgrim);
+    } else if (helper.filter_by_type(this.pilgrim.getVisibleRobots(), SPECS.PILGRIM).length < PILGRIM_LIMIT) {
+      new_state = new LoopState(this.pilgrim);
     } else {
       new_state = new ExpandState(this.pilgrim);
     }

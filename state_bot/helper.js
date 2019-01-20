@@ -77,7 +77,7 @@ helper.resource_locations = (robot, resource_type) => {
 };
 
 helper.same_position = (pos1, pos2) => {
-  return pos1[0] === pos2[0] && pos1[1] === pos2[1];
+  return Math.floor(pos1[0]) === Math.floor(pos2[0]) && Math.floor(pos1[1]) === Math.floor(pos2[1]);
 };
 
 helper.empty_resource_locations = (robot, resource_type) => {
