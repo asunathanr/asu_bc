@@ -1,5 +1,6 @@
 import { AbstractState } from './AbstractState.js';
 import { LoopState } from './LoopState.js';
+import { ExpandState } from './ExpandState.js';
 import { StationaryState } from './StationaryState.js';
 
 
@@ -38,7 +39,7 @@ class InitialState {
         this.pilgrim.getFuelMap()[this.pilgrim.me.y][this.pilgrim.me.x]) {
           new_state = new StationaryState(this.pilgrim);
     } else {
-      new_state = new LoopState(this.pilgrim);
+      new_state = new ExpandState(this.pilgrim);
     }
     new_state.check_state();
     return new_state;

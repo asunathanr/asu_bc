@@ -82,7 +82,6 @@ helper.same_position = (pos1, pos2) => {
 
 helper.empty_resource_locations = (robot, resource_type) => {
   const all_locations = helper.resource_locations(robot, resource_type);
-  robot.log("All locations: " + all_locations[0].toString());
   return all_locations.filter((loc) => {
     return robot.getVisibleRobotMap()[loc[1]][loc[0]] < 1;
   });
@@ -148,7 +147,13 @@ helper.difference = (pos1, pos2) => {
 }
 
 /**
- * filters visible robots for robots that are currently radioing
+ * Is pos a valid coordinate on the map?
+ */
+helper.on_map = (size, pos) => {
+  return pos[0] >= 0 && pos[1] >= 0 && pos[0] < size && pos[1] < size;
+}
+
+ /* filters visible robots for robots that are currently radioing
  * @param self: { MyRobot } object
  * @returns list of robots that are signaling
  */
