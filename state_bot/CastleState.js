@@ -50,9 +50,12 @@ export class CastleState extends AbstractState {
         
         // Unassigned resource cells in build location
         if (this.build_locations.length > 0) {
-            this.empty_resource_cells = this.build_locations.filter((cell) => {
-                return castle.getKarboniteMap()[cell[1]][cell[0]] || castle.getFuelMap()[cell[1]][cell[0]];
-            });
+            this.empty_resource_cells = [];
+            for (let cell of this.build_locations) {
+                if (castle.getKarboniteMap()[cell[1]][cell[0]] || castle.getFuelMap()[cell[1]][cell[0]]) {
+                    this.empty_resource_cells.push(cell);
+                }
+            }
         }
     
         //calculate my_half bounds
@@ -76,7 +79,7 @@ export class CastleState extends AbstractState {
         if (SPECS.UNITS[CRUSADER_TYPE].CONSTRUCTION_FUEL > this.castle.fuel ||
             SPECS.UNITS[CRUSADER_TYPE].CONSTRUCTION_KARBONITE > this.castle.karbonite) {
                 return this.idle_state;
-        } else 
+        }
         return this.build_state;
     }
 

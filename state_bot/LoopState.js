@@ -112,9 +112,6 @@ class LoopToDest {
   } 
 
   act() {
-    //if (neighbors(this.pilgrim.map, this.pilgrim.my_pos(), CONSTANTS.PILGRIM_SPEED).has([this.resource_location[1], this.resource_location[1]])) {
-      //return this.pilgrim.move(this.resource_location[0] - this.pilgrim.my_pos()[0], this.resource_location[1] - this.pilgrim.my_pos()[1]);
-    //}
     if (this.path.at_path_end()) {
       return;
     } 
@@ -130,7 +127,6 @@ class LoopToDest {
         
       let all_empty_resources = helper.empty_resource_locations(this.pilgrim, this.resource_type);
       nearest_resource = all_empty_resources[0];
-      this.pilgrim.log("Nearest resource: " + nearest_resource[1].toString() + ',' + nearest_resource[1].toString());
     }
     return nearest_resource;
   }
