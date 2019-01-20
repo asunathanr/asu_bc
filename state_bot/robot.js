@@ -79,15 +79,16 @@ class MyRobot extends BCAbstractRobot {
   move_unit() {
     if (!path.valid()) {
       this.log("Unit: " + this.me.id.toString() + " is trying to move on invalid path.");
-      this.log("Path is: " + path.serialize());
       return;
     }
     var choice = path.next();
     if (choice === END_OF_PATH) {
       return;
-    } else if (this.getVisibleRobotMap()[this.me.y + choice[1]][this.me.x + choice[0]]===0){
+    } 
+    else if (this.getVisibleRobotMap()[this.me.y + choice[1]][this.me.x + choice[0]]===0) {
       return this.move(choice[0], choice[1]);
-    } else {
+    } 
+    else {
       //this.log("something in my path, waiting " + (this.me.x + choice[0]) + "," + (this.me.y + choice[1]));
       path.prev();
       return;

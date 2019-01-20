@@ -45,16 +45,15 @@ export class CrusaderState extends AbstractState{
         // get attackable robots
 	    this.attackable = this.attackable = this.crusader.getAttackableRobots();
         //if attackable units, go to attack_state
-        if(this.attackable.length > 0){
+        if (this.attackable.length > 0) {
             return this.attack_state;
         }
         //if destintaion is reached, change destination to random point on enemy half of map
         else if(this.crusader.me.x===this.destination.x && this.crusader.me.y===this.destination.y) {
-            this.crusader.log(this.crusader.id, " has reached his destination, choosing new dest");
+            this.crusader.log(this.crusader.id.toString() + " has reached his destination, choosing new dest");
             let newDestination = nav.getRandHalfGrid(this.crusader);
-            this.destination.x = newDestination[0];
-            this.destination.y = newDestination[1];
-
+            this.destination.x = newDestination.x;
+            this.destination.y = newDestination.y;
             this.crusader.make_path(this.crusader.my_pos(), [this.destination.x, this.destination.y]);
         }
         return this.move_state;
