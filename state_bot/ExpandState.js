@@ -10,8 +10,7 @@ export class ExpandState {
   constructor(pilgrim) {
     this.pilgrim = pilgrim;
     
-    this.church_pos = {x: 0, y: 0};
-    // nav.getExpansionLocs(this.pilgrim, {xlo:0, xhi:grid.length, ylo:0, yhi:grid.length});
+    this.church_pos = nav.getExpansionLocs(this.pilgrim, {xlo:0, xhi:this.pilgrim.map.length, ylo:0, yhi:this.pilgrim.map.length});
     this.destination = this._pick_destination();
     this.current_state = new TravelState(this.pilgrim, this);
   }
